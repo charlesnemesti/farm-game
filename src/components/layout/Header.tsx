@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { CornCounter } from "@/components/layout/CornCounter";
+import { MusicControl } from "@/components/layout/MusicControl";
 
 // Reminder: requirements may arrive in Spanish, but implementation language is always English.
 
@@ -64,6 +65,7 @@ export function Header() {
         </div>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <MusicControl />
           <Suspense fallback={null}>
             <CalibrateToggle />
           </Suspense>

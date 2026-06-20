@@ -16,7 +16,7 @@ export function CropTimer({ crop, now, scale }: CropTimerProps) {
 
   return (
     <div
-      className="pointer-events-none absolute left-1/2 z-10 -translate-x-1/2"
+      className="pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
       style={{ bottom: `${32 * scale + 6}px` }}
     >
       <div

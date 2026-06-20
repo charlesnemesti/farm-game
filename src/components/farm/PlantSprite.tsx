@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import {
   CORN_SPRITE,
+  growthFrameForProgress,
   type CropKind,
   type PlantRarityTint,
 } from "@/lib/plantSprites";
@@ -8,7 +9,8 @@ import {
 type PlantSpriteProps = {
   crop: CropKind;
   scale: number;
-  animate?: boolean;
+  /** Harvest cycle progress from 0 (just planted) to 1 (ready). */
+  progress: number;
   rarityTint?: PlantRarityTint;
 };
 
@@ -34,27 +36,22 @@ function rarityClass(rarityTint?: PlantRarityTint): string {
 export function PlantSprite({
   crop,
   scale,
-  animate = true,
+  progress,
   rarityTint,
 }: PlantSpriteProps) {
   const sheet = spriteSheetFor(crop);
   const width = sheet.frameWidth * scale;
   const height = sheet.frameHeight * scale;
   const sheetWidth = sheet.frameWidth * sheet.frameCount * scale;
-  const duration = (sheet.frameCount * sheet.frameDurationMs) / 1000;
+  const frameIndex = growthFrameForProgress(progress, sheet.growthPhases);
+  const offsetX = frameIndex * width;
 
   const style: CSSProperties = {
     width,
     height,
     backgroundImage: `url(${sheet.src})`,
     backgroundSize: `${sheetWidth}px ${height}px`,
-    backgroundPosition: "0 0",
-    ["--sheet-offset" as string]: `-${sheetWidth}px`,
-    ...(animate
-      ? {
-          animation: `plant-sheet-play ${duration}s steps(${sheet.frameCount}) infinite`,
-        }
-      : {}),
+    backgroundPosition: `-${offsetX}px 0`,
   };
 
   return (

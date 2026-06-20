@@ -137,7 +137,7 @@ export function loadGameState(): GameState | null {
     const raw = localStorage.getItem(GAME_STATE_STORAGE_KEY);
     if (raw) {
       const data = JSON.parse(raw) as unknown;
-      if (isValidGameState(data)) return applyHarvestProgress(data);
+      if (isValidGameState(data)) return applyHarvestProgress(data).state;
       localStorage.removeItem(GAME_STATE_STORAGE_KEY);
     }
 
@@ -150,7 +150,7 @@ export function loadGameState(): GameState | null {
             ...legacy,
             xp: legacy.xp ?? 0,
           }),
-        );
+        ).state;
       }
       localStorage.removeItem(LEGACY_GAME_STATE_STORAGE_KEY);
     }
@@ -164,7 +164,7 @@ export function loadGameState(): GameState | null {
             ...legacy,
             xp: 0,
           }),
-        );
+        ).state;
       }
       localStorage.removeItem(LEGACY_GAME_STATE_STORAGE_KEY_V3);
     }
@@ -178,7 +178,7 @@ export function loadGameState(): GameState | null {
 }
 
 export function saveGameState(state: GameState, currentTime = Date.now()) {
-  const progressed = applyHarvestProgress(state, currentTime);
+  const { state: progressed } = applyHarvestProgress(state, currentTime);
   const normalized: GameState = {
     ...progressed,
     unlockedPlotIds: normalizeUnlockedPlotIds(progressed.unlockedPlotIds),

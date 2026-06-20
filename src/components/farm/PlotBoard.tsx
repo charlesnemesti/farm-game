@@ -5,9 +5,8 @@ import { useGame } from "@/context/GameProvider";
 import { designToScreen, type CoverTransform } from "@/hooks/useCoverTransform";
 import type { PlotSlotConfig } from "@/lib/plotBoard";
 import { PLOT_SLOTS } from "@/lib/plotBoard";
-import { RARITY_LABELS } from "@/lib/seedConfig";
-import { ConfirmDialog } from "@/components/game/ConfirmDialog";
 import { CropSlot } from "./CropSlot";
+import { CropUprootDialog } from "./CropUprootDialog";
 
 type PlotBoardProps = {
   transform: CoverTransform;
@@ -80,15 +79,9 @@ export function PlotBoard({
         </div>
       </div>
 
-      <ConfirmDialog
+      <CropUprootDialog
         open={uprootTarget !== null}
-        title="Uproot plant?"
-        message={
-          uprootTarget
-            ? `Remove this ${RARITY_LABELS[uprootTarget.rarity].toLowerCase()}? The furrow will be empty. You keep no rewards from the current cycle.`
-            : ""
-        }
-        confirmLabel="Uproot"
+        rarity={uprootTarget?.rarity ?? "common"}
         onConfirm={() => {
           if (!uprootTarget) return;
           uprootCrop(uprootTarget.plotId, uprootTarget.slotId);

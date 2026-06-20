@@ -76,6 +76,26 @@ body {
   color: #ffffff;
 }
 
+@keyframes harvest-float-up {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+  }
+
+  18% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    translate: 0 -28px;
+  }
+}
+
+.harvest-float {
+  animation: harvest-float-up 1.6s ease-out forwards;
+}
+
 @keyframes plant-sheet-play {
   from {
     background-position: 0 0;

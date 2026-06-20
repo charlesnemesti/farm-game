@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local playwright browsers (downloaded via npx playwright install)
+.playwright-browsers
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

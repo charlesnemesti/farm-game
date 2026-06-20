@@ -109,7 +109,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     const syncProgress = (currentTime = Date.now()) => {
       setState((prev) => {
-        const next = applyHarvestProgress(prev, currentTime);
+        const { state: next } = applyHarvestProgress(prev, currentTime);
         if (next === prev) return prev;
         saveGameState(next, currentTime);
         return next;
@@ -141,10 +141,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!hydrated) return;
 
+    const currentTime = Date.now();
+
     setState((prev) => {
-      const next = applyHarvestProgress(prev, Date.now());
+      const { state: next } = applyHarvestProgress(prev, currentTime);
       if (next === prev) return prev;
-      saveGameState(next);
+      saveGameState(next, currentTime);
       return next;
     });
   }, [hydrated, now]);
