@@ -12,7 +12,7 @@ type CropTimerProps = {
 
 export function CropTimer({ crop, now, scale }: CropTimerProps) {
   const { remainingMs, progress } = getCycleProgress(crop, now);
-  const barWidth = Math.max(36, 48 * scale);
+  const barWidth = Math.max(23, 30 * scale);
 
   return (
     <div
@@ -21,7 +21,7 @@ export function CropTimer({ crop, now, scale }: CropTimerProps) {
     >
       <div
         className="overflow-hidden rounded-full border border-black/50 bg-black/70"
-        style={{ width: barWidth, height: Math.max(10, 10 * scale) }}
+        style={{ width: barWidth, height: Math.max(6, 6.25 * scale) }}
       >
         <div
           className="h-full rounded-full bg-farm-sun transition-[width] duration-200"
@@ -30,7 +30,7 @@ export function CropTimer({ crop, now, scale }: CropTimerProps) {
       </div>
       <p
         className="mt-0.5 text-center font-bold text-white drop-shadow"
-        style={{ fontSize: Math.max(8, 9 * scale) }}
+        style={{ fontSize: Math.max(8, 5.625 * scale) }}
       >
         {formatRemainingTime(remainingMs)}
       </p>

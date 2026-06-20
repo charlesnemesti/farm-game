@@ -6,6 +6,7 @@ import { useCoverTransform } from "@/hooks/useCoverTransform";
 import { useSlotCalibration } from "@/hooks/useSlotCalibration";
 import { FARMER_NPC } from "@/lib/npcSprites";
 import { FARM_BACKGROUND, PLOT_SLOTS } from "@/lib/plotBoard";
+import { ROUTE_POINTS } from "@/lib/routeConfig";
 import { DevDebugPanel } from "@/components/game/DevDebugPanel";
 import { GameMenuPanel } from "@/components/game/GameMenuPanel";
 import { InventoryDebugOverlay } from "@/components/game/InventoryDebugOverlay";
@@ -49,7 +50,7 @@ function FarmSceneContent() {
           <PlotRowUnlockLayer transform={transform} />
 
           <FarmerNpc
-            route={calibration.routePoints}
+            route={ROUTE_POINTS}
             transform={transform}
             paused={farmerDialogOpen}
             onClick={() => setFarmerDialogOpen(true)}
@@ -88,7 +89,7 @@ function FarmSceneContent() {
               <DebugOverlay
                 transform={transform}
                 slots={PLOT_SLOTS}
-                routePoints={calibration.routePoints}
+                routePoints={ROUTE_POINTS}
                 target={calibration.target}
                 showCropMarkers={showCropMarkers}
                 showRouteMarkers={showRouteMarkers}

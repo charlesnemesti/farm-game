@@ -1,5 +1,5 @@
 // NOTE: All code must stay in English, even when requirements arrive in Spanish.
-// Tune route {x,y} values with ?debug=1 — select "Ruta" in the calibrator.
+// Route coordinates are in farm-scene.png design space (1024×571) — same on every screen.
 
 export type RoutePoint = {
   id: number;
@@ -9,19 +9,14 @@ export type RoutePoint = {
 
 export const ROUTE_POINT_COUNT = 8;
 
-/** Initial guess along the dirt path — calibrate in debug mode. */
-const ROUTE_SEED: Array<{ x: number; y: number }> = [
-  { x: 720, y: 480 },
-  { x: 640, y: 505 },
-  { x: 540, y: 515 },
-  { x: 440, y: 508 },
-  { x: 340, y: 492 },
-  { x: 250, y: 468 },
-  { x: 170, y: 438 },
-  { x: 120, y: 400 },
+/** Farmer patrol waypoints along the dirt path. */
+export const ROUTE_POINTS: RoutePoint[] = [
+  { id: 0, x: 835, y: 511 },
+  { id: 1, x: 731, y: 512 },
+  { id: 2, x: 627, y: 510 },
+  { id: 3, x: 534, y: 508 },
+  { id: 4, x: 450, y: 509 },
+  { id: 5, x: 364, y: 511 },
+  { id: 6, x: 277, y: 510 },
+  { id: 7, x: 225, y: 509 },
 ];
-
-export const ROUTE_POINTS: RoutePoint[] = ROUTE_SEED.map((point, id) => ({
-  id,
-  ...point,
-}));

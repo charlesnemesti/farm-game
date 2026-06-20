@@ -4,7 +4,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Header } from "@/components/layout/Header";
+import { ModeSelectOverlay } from "@/components/game/ModeSelectOverlay";
 import { GameProvider } from "@/context/GameProvider";
+import { PlayModeProvider } from "@/context/PlayModeProvider";
 import { SolanaWalletProvider } from "@/components/providers/SolanaWalletProvider";
 import "./globals.css";
 
@@ -35,10 +37,13 @@ export default function RootLayout({
     >
       <body className="relative min-h-full">
         <SolanaWalletProvider>
-          <GameProvider>
-            <Header />
-            {children}
-          </GameProvider>
+          <PlayModeProvider>
+            <GameProvider>
+              <Header />
+              {children}
+              <ModeSelectOverlay />
+            </GameProvider>
+          </PlayModeProvider>
         </SolanaWalletProvider>
       </body>
     </html>
