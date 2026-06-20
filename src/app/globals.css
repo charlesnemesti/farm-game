@@ -1,0 +1,142 @@
+/* Project convention: write all styles, tokens, and comments in English. */
+
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #f5f5f5;
+  --cursor-hand: url("/assets/ui/hand-cursor-40.png") 20 6, auto;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-farm-sky: #b8e0f6;
+  --color-farm-sky-dark: #87b8d9;
+  --color-farm-grass: #8bc34a;
+  --color-farm-grass-dark: #558b2f;
+  --color-farm-soil: #a1887f;
+  --color-farm-soil-light: #bcaaa4;
+  --color-farm-soil-dark: #6d4c41;
+  --color-farm-cream: #fff8e7;
+  --color-farm-sun: #ffc857;
+  --color-farm-sun-dark: #e6a800;
+  --color-farm-wood: #5d4037;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html,
+body {
+  height: 100%;
+  cursor: var(--cursor-hand);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* Re-enable later with class `.interactive-float` on chosen elements.
+@keyframes interactive-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+
+  50% {
+    translate: 0 -5px;
+  }
+}
+
+@media (hover: hover) {
+  .interactive-float:hover {
+    animation: interactive-float 1.6s ease-in-out infinite;
+  }
+}
+*/
+
+.farm-scene {
+  min-height: 100vh;
+}
+
+.pixel-art {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.calibrator-select {
+  color-scheme: dark;
+}
+
+.calibrator-select option {
+  background-color: #171717;
+  color: #ffffff;
+}
+
+@keyframes plant-sheet-play {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: var(--sheet-offset) 0;
+  }
+}
+
+.plant-sprite--rarity-purple {
+  filter: hue-rotate(255deg) saturate(1.85) brightness(1.1);
+}
+
+.plant-sprite--rarity-blue {
+  filter: hue-rotate(195deg) saturate(1.5) brightness(1.05);
+}
+
+@keyframes crop-slot-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(255, 200, 87, 0.45);
+  }
+
+  50% {
+    box-shadow: 0 0 18px rgba(255, 200, 87, 0.95);
+  }
+}
+
+.crop-slot--plantable::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  border: 2px solid rgba(255, 200, 87, 0.85);
+  animation: crop-slot-pulse 1.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes seed-pack-shake {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  20% {
+    transform: rotate(-4deg) scale(1.04);
+  }
+
+  40% {
+    transform: rotate(4deg) scale(1.08);
+  }
+
+  60% {
+    transform: rotate(-3deg) scale(1.05);
+  }
+
+  80% {
+    transform: rotate(3deg) scale(1.02);
+  }
+}
+
+.seed-pack-shake {
+  animation: seed-pack-shake 0.45s ease-in-out infinite;
+}
