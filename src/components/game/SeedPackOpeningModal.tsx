@@ -151,16 +151,6 @@ export function SeedPackOpeningModal({
         ) : (
           <div className="mt-6 h-11" aria-hidden />
         )}
-
-        {phase !== "ready" ? (
-          <button
-            type="button"
-            onClick={onClose}
-            className="mt-2 w-full text-xs text-white/45 transition hover:text-white/70"
-          >
-            Cancel
-          </button>
-        ) : null}
       </div>
     </div>
   );

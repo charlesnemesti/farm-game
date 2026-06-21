@@ -29,6 +29,7 @@ export function InventoryPanel({ menuPosition }: InventoryPanelProps) {
     discardInventoryItem,
   } = useGame();
   const [openingPackSlot, setOpeningPackSlot] = useState<number | null>(null);
+  const [openPackTarget, setOpenPackTarget] = useState<number | null>(null);
   const [inventoryMessage, setInventoryMessage] = useState<string | null>(null);
   const [discardTarget, setDiscardTarget] = useState<{
     slotId: number;
@@ -48,7 +49,7 @@ export function InventoryPanel({ menuPosition }: InventoryPanelProps) {
     }
 
     setInventoryMessage(null);
-    setOpeningPackSlot(slotId);
+    setOpenPackTarget(slotId);
   };
 
   const requestDiscard = (slotId: number) => {
@@ -120,6 +121,20 @@ export function InventoryPanel({ menuPosition }: InventoryPanelProps) {
           onClose={() => setOpeningPackSlot(null)}
         />
       ) : null}
+
+      <ConfirmDialog
+        open={openPackTarget !== null}
+        title="Open seed pack?"
+        message={`Open ${SEED_PACK_TOOLTIP.title}? ${SEED_PACK_TOOLTIP.description} This cannot be undone.`}
+        confirmLabel="Open pack"
+        confirmTone="primary"
+        onConfirm={() => {
+          if (openPackTarget === null) return;
+          setOpeningPackSlot(openPackTarget);
+          setOpenPackTarget(null);
+        }}
+        onCancel={() => setOpenPackTarget(null)}
+      />
 
       <ConfirmDialog
         open={discardTarget !== null}
