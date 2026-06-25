@@ -12,11 +12,14 @@ import {
 } from "react";
 import { usePlayMode } from "@/context/PlayModeProvider";
 import { useGame } from "@/context/GameProvider";
-import { CORN_SEED_ITEM, isSeedPack } from "@/lib/itemConfig";
+import { isSeedPack } from "@/lib/itemConfig";
 import {
+  clearTutorialCompleted,
   getTutorialStepConfig,
+  isInteractiveTutorialStep,
   loadTutorialCompleted,
   saveTutorialCompleted,
+  TUTORIAL_STEP_ORDER,
   type TutorialEvent,
   type TutorialStepId,
   type TutorialTargetId,
@@ -30,31 +33,20 @@ type TutorialNotifyMeta = {
 type TutorialContextValue = {
   active: boolean;
   completed: boolean;
+  reviewMode: boolean;
   step: TutorialStepId;
   stepConfig: ReturnType<typeof getTutorialStepConfig>;
   isStep: (stepId: TutorialStepId) => boolean;
   isTargetStep: (target: TutorialTargetId) => boolean;
   notifyEvent: (event: TutorialEvent, meta?: TutorialNotifyMeta) => void;
-  advanceWelcome: () => void;
+  advanceStep: () => void;
   finishTutorial: () => void;
   skipTutorial: () => void;
+  restartTutorial: (reviewMode?: boolean) => void;
   tutorialCrop: { plotId: number; slotId: number } | null;
 };
 
 const TutorialContext = createContext<TutorialContextValue | null>(null);
-
-const STEP_ORDER: TutorialStepId[] = [
-  "welcome",
-  "open-shop",
-  "buy-pack",
-  "open-pack",
-  "confirm-open",
-  "collect-seeds",
-  "select-seed",
-  "plant-seed",
-  "wait-harvest",
-  "done",
-];
 
 const EVENT_TO_STEP: Partial<Record<TutorialEvent, TutorialStepId>> = {
   "shop-opened": "open-shop",
@@ -72,6 +64,8 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
   const { hydrated, inventory, plantedCrops, accelerateCropCycle } = useGame();
   const [completed, setCompleted] = useState(true);
   const [hydratedTutorial, setHydratedTutorial] = useState(false);
+  const [reviewMode, setReviewMode] = useState(false);
+  const [manualReplay, setManualReplay] = useState(false);
   const [step, setStep] = useState<TutorialStepId>("welcome");
   const [tutorialCrop, setTutorialCrop] = useState<{
     plotId: number;
@@ -88,15 +82,16 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
     hydratedTutorial && hydrated && canPlay && !completed && step !== "done";
 
   const goToNextStep = useCallback((fromStep: TutorialStepId) => {
-    const index = STEP_ORDER.indexOf(fromStep);
-    if (index < 0 || index >= STEP_ORDER.length - 1) return;
-    setStep(STEP_ORDER[index + 1]);
+    const index = TUTORIAL_STEP_ORDER.indexOf(fromStep);
+    if (index < 0 || index >= TUTORIAL_STEP_ORDER.length - 1) return;
+    setStep(TUTORIAL_STEP_ORDER[index + 1]);
   }, []);
 
   const skipTutorial = useCallback(() => {
     saveTutorialCompleted();
     setCompleted(true);
     setStep("done");
+    setReviewMode(false);
     tutorialCropRef.current = null;
     setTutorialCrop(null);
   }, []);
@@ -105,9 +100,23 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
     skipTutorial();
   }, [skipTutorial]);
 
+  const restartTutorial = useCallback((review = false) => {
+    clearTutorialCompleted();
+    setCompleted(false);
+    setReviewMode(review);
+    setManualReplay(!review);
+    setStep("welcome");
+    tutorialCropRef.current = null;
+    setTutorialCrop(null);
+  }, []);
+
+  const advanceStep = useCallback(() => {
+    goToNextStep(step);
+  }, [goToNextStep, step]);
+
   const notifyEvent = useCallback(
     (event: TutorialEvent, meta?: TutorialNotifyMeta) => {
-      if (!active) return;
+      if (!active || reviewMode) return;
 
       const expectedStep = EVENT_TO_STEP[event];
       if (!expectedStep || step !== expectedStep) return;
@@ -120,23 +129,17 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
       }
 
       if (event === "harvest-received") {
-        setStep("done");
+        goToNextStep("wait-harvest");
         return;
       }
 
       goToNextStep(expectedStep);
     },
-    [active, accelerateCropCycle, goToNextStep, step],
+    [active, accelerateCropCycle, goToNextStep, reviewMode, step],
   );
 
-  const advanceWelcome = useCallback(() => {
-    if (step === "welcome") {
-      goToNextStep("welcome");
-    }
-  }, [goToNextStep, step]);
-
   useEffect(() => {
-    if (!active) return;
+    if (!active || reviewMode || manualReplay) return;
 
     const hasPack = inventory.some(
       (entry) => entry !== null && isSeedPack(entry.itemId),
@@ -154,7 +157,7 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
       accelerateCropCycle(crop.plotId, crop.slotId);
       goToNextStep("plant-seed");
     }
-  }, [active, accelerateCropCycle, goToNextStep, inventory, plantedCrops, step]);
+  }, [active, accelerateCropCycle, goToNextStep, inventory, manualReplay, plantedCrops, reviewMode, step]);
 
   const stepConfig = getTutorialStepConfig(step);
 
@@ -162,17 +165,34 @@ export function TutorialProvider({ children }: { children: ReactNode }) {
     () => ({
       active,
       completed,
+      reviewMode,
       step,
       stepConfig,
       isStep: (stepId: TutorialStepId) => step === stepId,
-      isTargetStep: (target: TutorialTargetId) => stepConfig.target === target,
+      isTargetStep: (target: TutorialTargetId) =>
+        !reviewMode &&
+        isInteractiveTutorialStep(step) &&
+        stepConfig.target === target,
       notifyEvent,
-      advanceWelcome,
+      advanceStep,
       finishTutorial,
       skipTutorial,
+      restartTutorial,
       tutorialCrop,
     }),
-    [active, advanceWelcome, completed, finishTutorial, notifyEvent, skipTutorial, step, stepConfig, tutorialCrop],
+    [
+      active,
+      advanceStep,
+      completed,
+      finishTutorial,
+      notifyEvent,
+      restartTutorial,
+      reviewMode,
+      skipTutorial,
+      step,
+      stepConfig,
+      tutorialCrop,
+    ],
   );
 
   return (

@@ -25,7 +25,6 @@ import {
 } from "@/lib/gameState";
 import { applyHarvestProgress } from "@/lib/harvestProgress";
 import { CORN_SEED_ITEM } from "@/lib/itemConfig";
-import { getWeatherIndexAt } from "@/lib/weatherConfig";
 import {
   getWeatherCornMultiplier,
   getWeatherGrowthMultiplier,
@@ -119,7 +118,7 @@ function isPlantableSeed(entry: InventoryEntry | null): entry is InventoryEntry 
 
 export function GameProvider({ children }: { children: ReactNode }) {
   const { playMode } = usePlayMode();
-  const { weather } = useWeather();
+  const { weather, weatherEpoch } = useWeather();
   const { publicKey, connected } = useWallet();
   const [state, setState] = useState<GameState>(() => createInitialGameState());
   const stateRef = useRef(state);
@@ -131,7 +130,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const [windUprootNotice, setWindUprootNotice] = useState<string | null>(null);
   const windUprootsThisWindowRef = useRef(0);
-  const weatherWindowRef = useRef(getWeatherIndexAt(Date.now()));
+  const weatherEpochRef = useRef(weatherEpoch);
 
   stateRef.current = state;
   playModeRef.current = playMode;
@@ -267,15 +266,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (!hydrated) return;
     if (document.visibilityState !== "visible") return;
 
-    const currentTime = Date.now();
-    const windowIndex = getWeatherIndexAt(currentTime);
-    if (windowIndex !== weatherWindowRef.current) {
-      weatherWindowRef.current = windowIndex;
+    if (weatherEpochRef.current !== weatherEpoch) {
+      weatherEpochRef.current = weatherEpoch;
       windUprootsThisWindowRef.current = 0;
     }
 
     setState((prev) => {
-      const { state: next } = applyHarvestProgress(prev, currentTime, {
+      const { state: next } = applyHarvestProgress(prev, Date.now(), {
         growthMultiplier: getWeatherGrowthMultiplier(weather),
         cornMultiplier: getWeatherCornMultiplier(weather),
       });
@@ -283,7 +280,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       persistState(next);
       return next;
     });
-  }, [hydrated, now, persistState, weather]);
+  }, [hydrated, now, persistState, weather, weatherEpoch]);
 
   useEffect(() => {
     if (!hydrated || demoMode) return;
@@ -298,9 +295,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (document.visibilityState !== "visible") return;
 
       const currentTime = Date.now();
-      const windowIndex = getWeatherIndexAt(currentTime);
-      if (windowIndex !== weatherWindowRef.current) {
-        weatherWindowRef.current = windowIndex;
+      if (weatherEpochRef.current !== weatherEpoch) {
+        weatherEpochRef.current = weatherEpoch;
         windUprootsThisWindowRef.current = 0;
       }
 
@@ -324,7 +320,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }, intervalMs);
 
     return () => window.clearInterval(intervalId);
-  }, [demoMode, hydrated, persistState, weather]);
+  }, [demoMode, hydrated, persistState, weather, weatherEpoch]);
 
   useEffect(() => {
     if (!windUprootNotice) return;

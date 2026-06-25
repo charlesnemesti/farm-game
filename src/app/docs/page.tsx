@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { DocsBackToFarmButton } from "@/components/docs/DocsBackToFarmButton";
 import { DocsSidebar } from "@/components/docs/DocsSidebar";
 import {
   getClusterLabel,
@@ -22,7 +22,7 @@ function DocsSectionBlock({
   return (
     <section
       id={id}
-      className="scroll-mt-8 rounded-xl border border-white/10 bg-black/50 p-6 sm:p-7"
+      className="scroll-mt-32 rounded-xl border border-white/10 bg-black/50 p-6 sm:p-7"
     >
       <h2 className="border-b border-white/10 pb-3 text-xl font-bold text-farm-sun">
         {title}
@@ -76,7 +76,7 @@ function OnChainSection({
   return (
     <section
       id="on-chain"
-      className="scroll-mt-8 rounded-xl border border-white/10 bg-black/50 p-6 sm:p-7"
+      className="scroll-mt-32 rounded-xl border border-white/10 bg-black/50 p-6 sm:p-7"
     >
       <h2 className="border-b border-white/10 pb-3 text-xl font-bold text-farm-sun">
         On-chain addresses
@@ -111,23 +111,18 @@ export default function DocsPage() {
   const mint = getCornMintAddress();
 
   return (
-    <div className="min-h-screen bg-[#0d1117] text-white">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+    <div className="min-h-screen bg-[#0d1117] pt-28 text-white sm:pt-32">
+      <div className="mx-auto max-w-6xl px-4 pb-8 sm:px-6 sm:pb-10">
         <div className="lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10 xl:grid-cols-[240px_minmax(0,1fr)]">
           <aside className="hidden lg:block">
-            <div className="sticky top-8">
+            <div className="sticky top-28 sm:top-32">
               <DocsSidebar />
             </div>
           </aside>
 
           <main className="min-w-0">
-            <div className="mb-6 lg:hidden">
-              <Link
-                href="/"
-                className="text-sm font-medium text-farm-sun transition hover:text-farm-sun-dark"
-              >
-                ← Back to farm
-              </Link>
+            <div className="mb-6">
+              <DocsBackToFarmButton />
             </div>
 
             <header className="mb-10 border-b border-white/10 pb-8">

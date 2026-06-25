@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { WeatherWheel } from "@/components/layout/WeatherWheel";
+import { WeatherCountdown } from "@/components/layout/WeatherCountdown";
 import {
   dismissWeatherInfo,
   isWeatherInfoDismissed,
@@ -25,7 +26,10 @@ export function WeatherHelpSection() {
   return (
     <div className="flex flex-col items-center gap-1.5">
       <div className="flex items-start gap-1.5">
-        <WeatherWheel />
+        <div className="flex flex-col items-center gap-0.5">
+          <WeatherWheel />
+          <WeatherCountdown />
+        </div>
         {ready && !expanded ? (
           <button
             type="button"
@@ -45,8 +49,8 @@ export function WeatherHelpSection() {
         <div className="weather-info-tooltip pointer-events-auto w-[min(calc(100vw-1.5rem),15rem)] rounded-lg border border-[#4a3428]/25 bg-[#f5e6c8]/95 px-3 py-2.5 text-left text-[#4a3428] shadow-lg">
           <p className="text-[11px] font-bold leading-snug sm:text-xs">Weather system</p>
           <p className="mt-1.5 text-[10px] leading-snug text-[#4a3428]/90 sm:text-[11px]">
-            The needle shows active weather. It changes every 3 minutes while you
-            play.
+            Every 3 minutes the wheel spins and picks the next weather at random
+            (50% sunny, 20% rain, 20% snow, 10% wind).
           </p>
           <ul className="mt-2 space-y-1 text-[10px] leading-snug text-[#4a3428]/90 sm:text-[11px]">
             <li>

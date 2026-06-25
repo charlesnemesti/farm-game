@@ -1,7 +1,9 @@
 import type { CSSProperties } from "react";
 import {
   CORN_SPRITE,
+  CORN_TEMPEST_SPRITE,
   growthFrameForProgress,
+  tempestFrameAtTime,
   type CropKind,
   type PlantRarityTint,
 } from "@/lib/plantSprites";
@@ -12,9 +14,14 @@ type PlantSpriteProps = {
   /** Harvest cycle progress from 0 (just planted) to 1 (ready). */
   progress: number;
   rarityTint?: PlantRarityTint;
+  /** Wall-clock ms for wind tempest frame animation. */
+  now?: number;
+  /** Use wind-battered mature sprite instead of growth sheet. */
+  windTempest?: boolean;
 };
 
-function spriteSheetFor(crop: CropKind) {
+function spriteSheetFor(crop: CropKind, windTempest: boolean) {
+  if (windTempest) return CORN_TEMPEST_SPRITE;
   switch (crop) {
     case "corn":
       return CORN_SPRITE;
@@ -38,12 +45,16 @@ export function PlantSprite({
   scale,
   progress,
   rarityTint,
+  now = 0,
+  windTempest = false,
 }: PlantSpriteProps) {
-  const sheet = spriteSheetFor(crop);
+  const sheet = spriteSheetFor(crop, windTempest);
   const width = sheet.frameWidth * scale;
   const height = sheet.frameHeight * scale;
   const sheetWidth = sheet.frameWidth * sheet.frameCount * scale;
-  const frameIndex = growthFrameForProgress(progress, sheet.growthPhases);
+  const frameIndex = windTempest
+    ? tempestFrameAtTime(now)
+    : growthFrameForProgress(progress, CORN_SPRITE.growthPhases);
   const offsetX = frameIndex * width;
 
   const style: CSSProperties = {

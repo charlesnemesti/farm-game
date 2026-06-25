@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getCycleProgress, type PlantedCrop } from "@/lib/cropState";
 import { PLANT_SPRITE_SIZE } from "@/lib/plotBoard";
-import { rarityTintForSeed } from "@/lib/plantSprites";
+import { rarityTintForSeed, shouldUseWindTempestSprite } from "@/lib/plantSprites";
 import type { CropKind } from "@/lib/plantSprites";
 import { SEED_STATS } from "@/lib/seedConfig";
 import { useTutorial } from "@/context/TutorialProvider";
@@ -97,6 +97,7 @@ export function CropSlot({
 
   if (planted) {
     const { progress } = getCycleProgress(planted, now, weather);
+    const windTempest = shouldUseWindTempestSprite(weather, progress);
 
     return (
       <button
@@ -130,6 +131,8 @@ export function CropSlot({
           crop={crop}
           scale={scale}
           progress={progress}
+          now={now}
+          windTempest={windTempest}
           rarityTint={rarityTintForSeed(planted.rarity)}
         />
       </button>

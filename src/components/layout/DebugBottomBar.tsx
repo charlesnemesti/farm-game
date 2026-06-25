@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useGame } from "@/context/GameProvider";
 import { useDebugUi } from "@/context/DebugUiProvider";
+import { useWeather } from "@/context/WeatherProvider";
 
 const DEBUG_CORN_AMOUNT = 5_000;
 const DEBUG_XP_AMOUNT = 500;
@@ -43,6 +44,7 @@ function DevDebugTools() {
   const searchParams = useSearchParams();
   const shouldReset = searchParams.get("reset") === "1";
   const { hydrated, resetSavedGame, addDebugCorn, addDebugXp } = useGame();
+  const { triggerWeatherSpin, weather, isSpinning } = useWeather();
   const { calibratorOpen, openCalibrator } = useDebugUi();
   const [message, setMessage] = useState<string | null>(null);
 
@@ -71,6 +73,21 @@ function DevDebugTools() {
           Open calibrator
         </button>
       ) : null}
+
+      <button
+        type="button"
+        onClick={() => {
+          if (triggerWeatherSpin()) {
+            flash("Weather spin started.");
+          } else {
+            flash(isSpinning ? "Spin already in progress." : "Weather not ready.");
+          }
+        }}
+        disabled={isSpinning}
+        className="rounded-lg border border-cyan-400/40 bg-black/70 px-3 py-1.5 text-xs font-semibold text-cyan-200 transition hover:bg-cyan-900/70 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        Spin weather ({weather})
+      </button>
 
       <button
         type="button"

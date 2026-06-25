@@ -8,6 +8,7 @@ import { Header } from "@/components/layout/Header";
 import { ModeSelectOverlay } from "@/components/game/ModeSelectOverlay";
 import { DemoConnectBanner } from "@/components/game/DemoConnectBanner";
 import { TutorialOverlay } from "@/components/game/TutorialOverlay";
+import { TutorialReplayButton } from "@/components/layout/TutorialReplayButton";
 import { DebugUiProvider } from "@/context/DebugUiProvider";
 import { DragProvider } from "@/context/DragProvider";
 import { GameProvider } from "@/context/GameProvider";
@@ -62,6 +63,7 @@ export default function RootLayout({
                           <DebugBottomBar />
                           {children}
                           <TutorialOverlay />
+                          <TutorialReplayButton />
                           <ModeSelectOverlay />
                           <DemoConnectBanner />
                         </DragProvider>

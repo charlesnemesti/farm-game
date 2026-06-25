@@ -106,23 +106,37 @@ function TutorialModal({
 }
 
 export function TutorialOverlay() {
-  const { active, completed, step, stepConfig, advanceWelcome, finishTutorial, skipTutorial } =
-    useTutorial();
+  const {
+    active,
+    completed,
+    reviewMode,
+    step,
+    stepConfig,
+    advanceStep,
+    finishTutorial,
+    skipTutorial,
+  } = useTutorial();
   const [spotlight, setSpotlight] = useState<SpotlightRect | null>(null);
 
+  const useModal =
+    reviewMode ||
+    stepConfig.kind === "intro" ||
+    stepConfig.kind === "info" ||
+    stepConfig.kind === "complete";
+
   const updateSpotlight = useCallback(() => {
-    if (!active || step === "welcome" || step === "done" || !stepConfig.target) {
+    if (!active || useModal || !stepConfig.target) {
       setSpotlight(null);
       return;
     }
 
     setSpotlight(findTargetRect(stepConfig.target));
-  }, [active, step, stepConfig.target]);
+  }, [active, stepConfig.target, useModal]);
 
   useEffect(() => {
     updateSpotlight();
 
-    if (!active) return;
+    if (!active || useModal) return;
 
     const intervalId = window.setInterval(updateSpotlight, 200);
     window.addEventListener("resize", updateSpotlight);
@@ -133,7 +147,7 @@ export function TutorialOverlay() {
       window.removeEventListener("resize", updateSpotlight);
       window.removeEventListener("scroll", updateSpotlight, true);
     };
-  }, [active, updateSpotlight]);
+  }, [active, updateSpotlight, useModal]);
 
   if (completed) return null;
 
@@ -143,8 +157,8 @@ export function TutorialOverlay() {
         label={`Tutorial · ${stepConfig.stepLabel}`}
         title={stepConfig.title}
         body={stepConfig.body}
-        buttonLabel="Let's go"
-        onAction={advanceWelcome}
+        buttonLabel={reviewMode ? "Start review" : "Let's go"}
+        onAction={advanceStep}
         onSkip={skipTutorial}
       />
     );
@@ -164,6 +178,19 @@ export function TutorialOverlay() {
 
   if (!active) return null;
 
+  if (useModal) {
+    return (
+      <TutorialModal
+        label={`Tutorial · ${stepConfig.stepLabel}`}
+        title={stepConfig.title}
+        body={stepConfig.body}
+        buttonLabel="Next"
+        onAction={advanceStep}
+        onSkip={skipTutorial}
+      />
+    );
+  }
+
   return (
     <div className="pointer-events-none fixed inset-0 z-[600]">
       {spotlight ? (
@@ -181,8 +208,15 @@ export function TutorialOverlay() {
           <p className="mt-2 text-xs leading-relaxed text-white/75">{stepConfig.body}</p>
           <button
             type="button"
+            onClick={advanceStep}
+            className="mt-3 w-full rounded-lg bg-farm-sun py-2 text-xs font-bold text-farm-wood transition hover:bg-farm-sun-dark"
+          >
+            Next
+          </button>
+          <button
+            type="button"
             onClick={skipTutorial}
-            className="mt-3 w-full rounded-lg border border-white/15 py-2 text-xs font-semibold text-white/70 transition hover:bg-white/10 hover:text-white"
+            className="mt-2 w-full rounded-lg border border-white/15 py-2 text-xs font-semibold text-white/70 transition hover:bg-white/10 hover:text-white"
           >
             Skip tutorial
           </button>

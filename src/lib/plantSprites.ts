@@ -1,6 +1,9 @@
 // NOTE: All code must stay in English, even when requirements arrive in Spanish.
 
 import type { SeedRarity } from "./seedConfig";
+import type { WeatherType } from "./weatherConfig";
+
+export const WIND_TEMPEST_MIN_PROGRESS = 0.75;
 
 export type GrowthPhase = {
   /** Inclusive first frame of this phase (0-based). */
@@ -28,6 +31,15 @@ export const CORN_SPRITE = {
   frameHeight: 32,
   frameCount: 20,
   growthPhases: CORN_GROWTH_PHASES,
+} as const;
+
+/** Wind sway spritesheet — shown at 75%+ cycle progress during wind weather. */
+export const CORN_TEMPEST_SPRITE = {
+  src: "/assets/plants/corn-tempest-wind.png",
+  frameWidth: 16,
+  frameHeight: 32,
+  frameCount: 12,
+  frameDurationMs: 100,
 } as const;
 
 export type CropKind = "corn";
@@ -71,4 +83,18 @@ export function rarityTintForSeed(rarity: SeedRarity): PlantRarityTint | undefin
     case "epic":
       return "purple";
   }
+}
+
+export function shouldUseWindTempestSprite(
+  weather: WeatherType,
+  progress: number,
+): boolean {
+  return weather === "wind" && progress >= WIND_TEMPEST_MIN_PROGRESS;
+}
+
+export function tempestFrameAtTime(now: number): number {
+  return (
+    Math.floor(now / CORN_TEMPEST_SPRITE.frameDurationMs) %
+    CORN_TEMPEST_SPRITE.frameCount
+  );
 }

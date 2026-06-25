@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import { DocsBackToFarmButton } from "@/components/docs/DocsBackToFarmButton";
 import { DOCS_NAV_GROUPS } from "@/lib/docsContent";
 
 export function DocsSidebar() {
@@ -44,14 +44,9 @@ export function DocsSidebar() {
   return (
     <nav
       aria-label="Documentation sections"
-      className="docs-sidebar flex max-h-[calc(100vh-2rem)] flex-col overflow-y-auto rounded-xl border border-white/10 bg-black/70 p-4 backdrop-blur-sm"
+      className="docs-sidebar flex max-h-[calc(100vh-8rem)] flex-col overflow-y-auto rounded-xl border border-white/10 bg-black/70 p-4 backdrop-blur-sm sm:max-h-[calc(100vh-9rem)]"
     >
-      <Link
-        href="/"
-        className="mb-4 text-xs font-medium text-farm-sun transition hover:text-farm-sun-dark"
-      >
-        ← Back to farm
-      </Link>
+      <DocsBackToFarmButton className="mb-4 w-full justify-center" />
 
       <p className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
         On this page
