@@ -6,27 +6,26 @@ import {
   type InventorySlot,
 } from "@/lib/inventoryBoard";
 import { useDrag } from "@/context/DragProvider";
-import { getMenuScale, menuToScreen } from "@/lib/menuCoordinates";
-import type { ScreenPosition } from "@/lib/uiConfig";
+import { menuToScreen, type GameMenuLayout } from "@/lib/menuCoordinates";
 
 type InventorySlotBoardProps = {
-  menuPosition: ScreenPosition;
+  menuLayout: GameMenuLayout;
   slots?: InventorySlot[];
 };
 
 // Inventory drop zones — visible while dragging to reorder items.
 export function InventorySlotBoard({
-  menuPosition,
+  menuLayout,
   slots = INVENTORY_SLOTS,
 }: InventorySlotBoardProps) {
   const { isDragging } = useDrag();
-  const scale = getMenuScale();
+  const { position: menuPosition, scale } = menuLayout;
   const hitSize = INVENTORY_SLOT_SIZE * scale;
 
   return (
     <>
       {slots.map((slot) => {
-        const screen = menuToScreen(slot.x, slot.y, menuPosition);
+        const screen = menuToScreen(slot.x, slot.y, menuPosition, scale);
 
         return (
           <div

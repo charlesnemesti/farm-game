@@ -5,24 +5,23 @@ import { useDrag } from "@/context/DragProvider";
 import { useGame } from "@/context/GameProvider";
 import { useTutorial } from "@/context/TutorialProvider";
 import { INVENTORY_SLOTS } from "@/lib/inventoryBoard";
-import { getMenuScale, menuToScreen } from "@/lib/menuCoordinates";
 import { CORN_SEED_ITEM, isSeedPack, SEED_PACK_TOOLTIP } from "@/lib/itemConfig";
+import { menuToScreen, type GameMenuLayout } from "@/lib/menuCoordinates";
 import { RARITY_LABELS } from "@/lib/seedConfig";
-import type { ScreenPosition } from "@/lib/uiConfig";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { InventoryItemVisual } from "./InventoryItemTooltip";
 import { InventorySlotBoard } from "./InventorySlotBoard";
 import { SeedPackOpeningModal } from "./SeedPackOpeningModal";
 
 type InventoryPanelProps = {
-  menuPosition: ScreenPosition;
+  menuLayout: GameMenuLayout;
 };
 
 const BASE_ITEM_SIZE = 72;
 const ITEM_SIZE_SCALE = 1.44;
 
 // Inventory hitboxes, item visuals, and seed pack opening flow.
-export function InventoryPanel({ menuPosition }: InventoryPanelProps) {
+export function InventoryPanel({ menuLayout }: InventoryPanelProps) {
   const {
     inventory,
     canOpenSeedPack,
@@ -39,7 +38,7 @@ export function InventoryPanel({ menuPosition }: InventoryPanelProps) {
     slotId: number;
     label: string;
   } | null>(null);
-  const scale = getMenuScale();
+  const { position: menuPosition, scale } = menuLayout;
   const itemSize = BASE_ITEM_SIZE * ITEM_SIZE_SCALE * scale;
 
   const tryOpenPack = (slotId: number) => {
@@ -82,13 +81,13 @@ export function InventoryPanel({ menuPosition }: InventoryPanelProps) {
 
   return (
     <>
-      <InventorySlotBoard menuPosition={menuPosition} />
+      <InventorySlotBoard menuLayout={menuLayout} />
 
       {INVENTORY_SLOTS.map((slot) => {
         const entry = inventory[slot.id];
         if (!entry) return null;
 
-        const screen = menuToScreen(slot.x, slot.y, menuPosition);
+        const screen = menuToScreen(slot.x, slot.y, menuPosition, scale);
 
         return (
           <div

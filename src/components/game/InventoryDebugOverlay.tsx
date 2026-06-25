@@ -3,11 +3,10 @@
 import { useRef } from "react";
 import type { CalibrationTarget } from "@/hooks/useSlotCalibration";
 import type { InventorySlot } from "@/lib/inventoryBoard";
-import { menuToScreen, screenToMenu } from "@/lib/menuCoordinates";
-import type { ScreenPosition } from "@/lib/uiConfig";
+import { menuToScreen, screenToMenu, type GameMenuLayout } from "@/lib/menuCoordinates";
 
 type InventoryDebugOverlayProps = {
-  menuPosition: ScreenPosition;
+  menuLayout: GameMenuLayout;
   slots: InventorySlot[];
   target: CalibrationTarget;
   visible?: boolean;
@@ -36,13 +35,14 @@ function isInventorySelected(
 
 // Purple markers for inventory slot calibration (MENU.png space).
 export function InventoryDebugOverlay({
-  menuPosition,
+  menuLayout,
   slots,
   target,
   visible = false,
   onSelect,
   onMoveSlot,
 }: InventoryDebugOverlayProps) {
+  const { position: menuPosition, scale } = menuLayout;
   const dragRef = useRef<{
     row: number;
     col: number;
@@ -68,7 +68,7 @@ export function InventoryDebugOverlay({
   ) => {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
-    const menu = screenToMenu(event.clientX, event.clientY, menuPosition);
+    const menu = screenToMenu(event.clientX, event.clientY, menuPosition, scale);
     onMoveSlot(row, col, menu.x, menu.y);
   };
 
@@ -82,7 +82,7 @@ export function InventoryDebugOverlay({
   return (
     <div className="pointer-events-none absolute inset-0 z-[110]">
       {slots.map((slot) => {
-        const screen = menuToScreen(slot.x, slot.y, menuPosition);
+        const screen = menuToScreen(slot.x, slot.y, menuPosition, scale);
         const selected = isInventorySelected(slot.row, slot.col, target);
 
         return (

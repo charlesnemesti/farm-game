@@ -8,6 +8,7 @@ import { ModeSelectOverlay } from "@/components/game/ModeSelectOverlay";
 import { TutorialOverlay } from "@/components/game/TutorialOverlay";
 import { DragProvider } from "@/context/DragProvider";
 import { GameProvider } from "@/context/GameProvider";
+import { InventoryMenuProvider } from "@/context/InventoryMenuProvider";
 import { TutorialProvider } from "@/context/TutorialProvider";
 import { BackgroundMusicProvider } from "@/context/BackgroundMusicProvider";
 import { PlayModeProvider } from "@/context/PlayModeProvider";
@@ -45,12 +46,14 @@ export default function RootLayout({
             <BackgroundMusicProvider>
               <GameProvider>
                 <TutorialProvider>
-                  <DragProvider>
-                    <Header />
-                    {children}
-                    <TutorialOverlay />
-                    <ModeSelectOverlay />
-                  </DragProvider>
+                  <InventoryMenuProvider>
+                    <DragProvider>
+                      <Header />
+                      {children}
+                      <TutorialOverlay />
+                      <ModeSelectOverlay />
+                    </DragProvider>
+                  </InventoryMenuProvider>
                 </TutorialProvider>
               </GameProvider>
             </BackgroundMusicProvider>

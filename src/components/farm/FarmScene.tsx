@@ -3,17 +3,17 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 import { useTutorial } from "@/context/TutorialProvider";
+import { useInventoryMenu } from "@/context/InventoryMenuProvider";
 import { useCoverTransform } from "@/hooks/useCoverTransform";
 import { useSlotCalibration } from "@/hooks/useSlotCalibration";
-import { getGameMenuScreenPosition } from "@/lib/menuCoordinates";
+import { getGameMenuLayout, resolveMenuLayout } from "@/lib/menuCoordinates";
 import { FARMER_NPC } from "@/lib/npcSprites";
 import { FARM_BACKGROUND, PLOT_SLOTS } from "@/lib/plotBoard";
 import { ROUTE_POINTS } from "@/lib/routeConfig";
+import { BackpackToggle } from "@/components/game/BackpackToggle";
 import { DevDebugPanel } from "@/components/game/DevDebugPanel";
-import { GameMenuPanel } from "@/components/game/GameMenuPanel";
 import { InventoryDebugOverlay } from "@/components/game/InventoryDebugOverlay";
-import { InventoryPanel } from "@/components/game/InventoryPanel";
-import { MenuStatsPanel } from "@/components/game/MenuStatsPanel";
+import { InventoryMenuShell } from "@/components/game/InventoryMenuShell";
 import { DebugOverlay } from "./DebugOverlay";
 import { FarmerNpc } from "./FarmerNpc";
 import { PlotBoard } from "./PlotBoard";
@@ -29,17 +29,40 @@ function FarmSceneContent() {
   const debug = searchParams.get("debug") === "1";
   const transform = useCoverTransform();
   const calibration = useSlotCalibration();
-  const [menuOpen, setMenuOpen] = useState(true);
+  const {
+    hydrated: menuHydrated,
+    isOpen: inventoryMenuOpen,
+    positionRatio,
+    open: openInventoryMenu,
+    close: closeInventoryMenu,
+    setPositionRatio,
+  } = useInventoryMenu();
+  const [calibratorOpen, setCalibratorOpen] = useState(true);
   const [showCropMarkers, setShowCropMarkers] = useState(false);
   const [showRouteMarkers, setShowRouteMarkers] = useState(false);
   const [showInventoryMarkers, setShowInventoryMarkers] = useState(false);
   const [farmerDialogOpen, setFarmerDialogOpen] = useState(false);
   const [villagerDialogOpen, setVillagerDialogOpen] = useState(false);
   const { notifyEvent } = useTutorial();
-  const sceneReady = transform.ready && calibration.hydrated;
-  const menuScreenPosition = useMemo(
-    () => getGameMenuScreenPosition(calibration.gameMenuDesignAnchor, transform),
+  const sceneReady = transform.ready && calibration.hydrated && menuHydrated;
+  const baseMenuLayout = useMemo(
+    () => getGameMenuLayout(transform, calibration.gameMenuDesignAnchor),
     [calibration.gameMenuDesignAnchor, transform],
+  );
+  const menuLayout = useMemo(
+    () =>
+      resolveMenuLayout(
+        baseMenuLayout,
+        transform.viewportWidth,
+        transform.viewportHeight,
+        positionRatio,
+      ),
+    [
+      baseMenuLayout,
+      positionRatio,
+      transform.viewportHeight,
+      transform.viewportWidth,
+    ],
   );
 
   return (
@@ -83,14 +106,17 @@ function FarmSceneContent() {
             onClose={() => setFarmerDialogOpen(false)}
           />
 
-          <GameMenuPanel
-            position={menuScreenPosition}
-            calibratorActive={debug && calibration.target.kind === "gameMenu"}
-          />
-
-          <InventoryPanel menuPosition={menuScreenPosition} />
-
-          <MenuStatsPanel menuPosition={menuScreenPosition} />
+          {inventoryMenuOpen ? (
+            <InventoryMenuShell
+              layout={menuLayout}
+              transform={transform}
+              calibratorActive={debug && calibration.target.kind === "gameMenu"}
+              onClose={closeInventoryMenu}
+              onPositionCommit={setPositionRatio}
+            />
+          ) : (
+            <BackpackToggle onClick={openInventoryMenu} />
+          )}
 
           {debug ? (
             <>
@@ -109,7 +135,7 @@ function FarmSceneContent() {
               />
 
               <InventoryDebugOverlay
-                menuPosition={menuScreenPosition}
+                menuLayout={menuLayout}
                 slots={calibration.inventorySlots}
                 target={calibration.target}
                 visible={showInventoryMarkers}
@@ -117,7 +143,7 @@ function FarmSceneContent() {
                 onMoveSlot={calibration.setInventorySlotPosition}
               />
 
-              {menuOpen ? (
+              {calibratorOpen ? (
                 <SlotCalibratorPanel
                   target={calibration.target}
                   step={calibration.step}
@@ -137,12 +163,12 @@ function FarmSceneContent() {
                   onRowSpacing={calibration.adjustRowSpacing}
                   onReset={calibration.reset}
                   onCopy={calibration.copyConfig}
-                  onClose={() => setMenuOpen(false)}
+                  onClose={() => setCalibratorOpen(false)}
                 />
               ) : (
                 <button
                   type="button"
-                  onClick={() => setMenuOpen(true)}
+                  onClick={() => setCalibratorOpen(true)}
                   className="absolute top-16 right-4 z-[120] rounded-lg border border-white/20 bg-black/80 px-3 py-2 text-xs font-semibold text-white shadow-lg backdrop-blur-sm transition hover:bg-black/90"
                 >
                   Open calibrator
