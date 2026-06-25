@@ -1,5 +1,6 @@
 import { DocsBackToFarmButton } from "@/components/docs/DocsBackToFarmButton";
 import { DocsSidebar } from "@/components/docs/DocsSidebar";
+import { CURRENCY_TICKER, GAME_NAME } from "@/lib/brandConfig";
 import {
   getClusterLabel,
   getCornMintAddress,
@@ -8,8 +9,8 @@ import {
 import { DOCS_NAV_GROUPS, DOCS_SECTIONS } from "@/lib/docsContent";
 
 export const metadata = {
-  title: "Docs — SolFarm",
-  description: "Complete guide to SolFarm gameplay, $CORN, treasury, and on-chain features",
+  title: `Docs — ${GAME_NAME}`,
+  description: `Complete guide to ${GAME_NAME} gameplay, ${CURRENCY_TICKER}, treasury, and on-chain features`,
 };
 
 function DocsSectionBlock({
@@ -130,7 +131,7 @@ export default function DocsPage() {
                 Documentation
               </p>
               <h1 className="mt-2 text-3xl font-bold text-farm-sun sm:text-4xl">
-                SolFarm Docs
+                {GAME_NAME} Docs
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/65 sm:text-base">
                 Everything you need to understand the game, the economy, and on-chain

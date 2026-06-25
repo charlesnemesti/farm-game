@@ -16,10 +16,11 @@ import {
 } from "@/lib/inventoryBoard";
 import { GAME_MENU_DESIGN_ANCHOR, type ScreenPosition } from "@/lib/uiConfig";
 import { useCoverTransform } from "@/hooks/useCoverTransform";
+import { STORAGE_PREFIX } from "@/lib/brandConfig";
 
-const SLOT_STORAGE_KEY = "solfarm-slot-calibration-v2";
-const ROUTE_STORAGE_KEY = "solfarm-route-calibration";
-const PIG_ROUTE_STORAGE_KEY = "solfarm-pig-route-calibration";
+const SLOT_STORAGE_KEY = `${STORAGE_PREFIX}-slot-calibration-v1`;
+const ROUTE_STORAGE_KEY = `${STORAGE_PREFIX}-route-calibration-v1`;
+const PIG_ROUTE_STORAGE_KEY = `${STORAGE_PREFIX}-pig-route-calibration-v1`;
 
 export type CalibrationTarget =
   | { kind: "all" }

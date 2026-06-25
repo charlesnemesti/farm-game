@@ -1,5 +1,7 @@
 // NOTE: All code must stay in English, even when requirements arrive in Spanish.
 
+import { GAME_NAME } from "./brandConfig";
+
 export const FARMER_SPRITE = {
   src: "/assets/npcs/farmer-walk.png",
   frameWidth: 32,
@@ -57,7 +59,7 @@ export const FARMER_NPC = {
   id: "farmer",
   name: "Old Mac",
   greeting:
-    "Welcome to SolFarm! Plant your crops, harvest on time, and rare purple yields fetch a higher price on the market.",
+    `Welcome to ${GAME_NAME}! Plant your crops, harvest $CORN on time, and rare purple yields fetch a higher price on the market.`,
 } as const;
 
 /** Single-frame-per-direction idle sheet (32×32 × 4 rows). */

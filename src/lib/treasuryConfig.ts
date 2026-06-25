@@ -1,6 +1,7 @@
 // NOTE: All code must stay in English, even when requirements arrive in Spanish.
 
 import { clusterApiUrl, PublicKey } from "@solana/web3.js";
+import { STORAGE_PREFIX } from "./brandConfig";
 
 export type SolanaCluster = "mainnet-beta" | "devnet" | "testnet";
 
@@ -18,7 +19,7 @@ export const CORN_DECIMALS = Number(process.env.NEXT_PUBLIC_CORN_DECIMALS ?? 6);
 export const WITHDRAW_MIN_LEVEL = 10;
 export const WITHDRAW_COOLDOWN_MS = 8 * 60 * 60 * 1000;
 
-export const TREASURY_STORAGE_KEY = "solfarm-treasury-v1";
+export const TREASURY_STORAGE_KEY = `${STORAGE_PREFIX}-treasury-v1`;
 
 /** Tokenomics aligned with a pump.fun fair-launch memecoin + in-game treasury loop. */
 export const TOKENOMICS = {

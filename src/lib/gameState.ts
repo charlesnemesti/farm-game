@@ -5,10 +5,10 @@ import type { PlantedCrop } from "./cropState";
 import { applyHarvestProgress } from "./harvestProgress";
 import { PLOT_COUNT } from "./plotBoard";
 import {
-  deriveUnlockedPlotIdsFromCrops,
   getStarterUnlockedPlotIds,
   normalizeUnlockedPlotIds,
 } from "./plotUnlock";
+import { STORAGE_PREFIX } from "./brandConfig";
 import type { SeedRarity } from "./seedConfig";
 
 export type InventoryEntry = {
@@ -27,9 +27,7 @@ export type GameState = {
   lastProgressAt?: number;
 };
 
-export const GAME_STATE_STORAGE_KEY = "solfarm-game-state-v5";
-export const LEGACY_GAME_STATE_STORAGE_KEY = "solfarm-game-state-v4";
-export const LEGACY_GAME_STATE_STORAGE_KEY_V3 = "solfarm-game-state-v3";
+export const GAME_STATE_STORAGE_KEY = `${STORAGE_PREFIX}-game-state-v1`;
 export const STARTING_CORN = 5_000;
 export const WALLET_STARTING_CORN = 0;
 
@@ -77,19 +75,6 @@ function isValidUnlockedPlotIds(value: unknown): value is number[] {
   );
 }
 
-function attachUnlockedPlotIds(
-  state: Omit<GameState, "unlockedPlotIds"> & { unlockedPlotIds?: number[] },
-): GameState {
-  const unlockedPlotIds = state.unlockedPlotIds
-    ? normalizeUnlockedPlotIds(state.unlockedPlotIds)
-    : deriveUnlockedPlotIdsFromCrops(state.plantedCrops);
-
-  return {
-    ...state,
-    unlockedPlotIds,
-  };
-}
-
 export function isValidGameState(data: unknown): data is GameState {
   if (!data || typeof data !== "object") return false;
   const state = data as GameState;
@@ -118,74 +103,19 @@ export function isValidGameState(data: unknown): data is GameState {
   );
 }
 
-function isValidLegacyGameState(
-  data: unknown,
-): data is Omit<GameState, "unlockedPlotIds" | "xp"> & { xp?: number; unlockedPlotIds?: number[] } {
-  if (!data || typeof data !== "object") return false;
-  const state = data as Omit<GameState, "xp">;
-  if (typeof state.corn !== "number" || !Number.isFinite(state.corn)) return false;
-  if (!Array.isArray(state.inventory) || state.inventory.length !== INVENTORY_SLOT_COUNT) {
-    return false;
-  }
-  if (!Array.isArray(state.plantedCrops)) return false;
-  if (!state.plantedCrops.every(isValidPlantedCrop)) return false;
-
-  return state.inventory.every(
-    (entry) =>
-      entry === null ||
-      (typeof entry === "object" &&
-        typeof entry.itemId === "string" &&
-        typeof entry.quantity === "number" &&
-        entry.quantity > 0 &&
-        (entry.rarity === undefined ||
-          entry.rarity === "common" ||
-          entry.rarity === "rare" ||
-          entry.rarity === "epic")),
-  );
-}
-
 export function loadGameState(): GameState | null {
   if (typeof window === "undefined") return null;
 
   try {
     const raw = localStorage.getItem(GAME_STATE_STORAGE_KEY);
-    if (raw) {
-      const data = JSON.parse(raw) as unknown;
-      if (isValidGameState(data)) return applyHarvestProgress(data).state;
-      localStorage.removeItem(GAME_STATE_STORAGE_KEY);
-    }
+    if (!raw) return null;
 
-    const legacyV4Raw = localStorage.getItem(LEGACY_GAME_STATE_STORAGE_KEY);
-    if (legacyV4Raw) {
-      const legacy = JSON.parse(legacyV4Raw) as unknown;
-      if (isValidLegacyGameState(legacy)) {
-        return applyHarvestProgress(
-          attachUnlockedPlotIds({
-            ...legacy,
-            xp: legacy.xp ?? 0,
-          }),
-        ).state;
-      }
-      localStorage.removeItem(LEGACY_GAME_STATE_STORAGE_KEY);
-    }
+    const data = JSON.parse(raw) as unknown;
+    if (isValidGameState(data)) return applyHarvestProgress(data).state;
 
-    const legacyV3Raw = localStorage.getItem(LEGACY_GAME_STATE_STORAGE_KEY_V3);
-    if (legacyV3Raw) {
-      const legacy = JSON.parse(legacyV3Raw) as unknown;
-      if (isValidLegacyGameState(legacy)) {
-        return applyHarvestProgress(
-          attachUnlockedPlotIds({
-            ...legacy,
-            xp: 0,
-          }),
-        ).state;
-      }
-      localStorage.removeItem(LEGACY_GAME_STATE_STORAGE_KEY_V3);
-    }
+    localStorage.removeItem(GAME_STATE_STORAGE_KEY);
   } catch {
     localStorage.removeItem(GAME_STATE_STORAGE_KEY);
-    localStorage.removeItem(LEGACY_GAME_STATE_STORAGE_KEY);
-    localStorage.removeItem(LEGACY_GAME_STATE_STORAGE_KEY_V3);
   }
 
   return null;
@@ -200,14 +130,10 @@ export function saveGameState(state: GameState, currentTime = Date.now()) {
     lastProgressAt: currentTime,
   };
   localStorage.setItem(GAME_STATE_STORAGE_KEY, JSON.stringify(normalized));
-  localStorage.removeItem(LEGACY_GAME_STATE_STORAGE_KEY);
-  localStorage.removeItem(LEGACY_GAME_STATE_STORAGE_KEY_V3);
   return normalized;
 }
 
 export function clearAllSavedGameState() {
   if (typeof window === "undefined") return;
   localStorage.removeItem(GAME_STATE_STORAGE_KEY);
-  localStorage.removeItem(LEGACY_GAME_STATE_STORAGE_KEY);
-  localStorage.removeItem(LEGACY_GAME_STATE_STORAGE_KEY_V3);
 }

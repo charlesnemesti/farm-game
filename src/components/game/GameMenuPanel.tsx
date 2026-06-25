@@ -1,5 +1,6 @@
 "use client";
 
+import { GAME_NAME } from "@/lib/brandConfig";
 import {
   FARM_MENU,
   MENU_ARTWORK_INSET,
@@ -45,7 +46,7 @@ export function GameMenuPanel({
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={MENU_TITLE.src}
-        alt="Corn Farm"
+        alt={GAME_NAME}
         draggable={false}
         className="pointer-events-none absolute z-10 h-auto -translate-x-1/2 -translate-y-1/2 object-contain pixel-art mix-blend-screen"
         style={{

@@ -1,4 +1,6 @@
-export const WEATHER_INFO_DISMISSED_KEY = "solfarm-weather-info-dismissed-v1";
+import { STORAGE_PREFIX } from "./brandConfig";
+
+export const WEATHER_INFO_DISMISSED_KEY = `${STORAGE_PREFIX}-weather-info-dismissed-v1`;
 
 export function isWeatherInfoDismissed(): boolean {
   if (typeof window === "undefined") return false;

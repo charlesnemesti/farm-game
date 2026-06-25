@@ -5,7 +5,9 @@ export const BACKGROUND_MUSIC_SRC = "/assets/audio/background-music.mp3";
 /** Default playback volume (5%). */
 export const DEFAULT_MUSIC_VOLUME = 0.05;
 
-export const MUSIC_SETTINGS_STORAGE_KEY = "solfarm-music-settings-v1";
+import { STORAGE_PREFIX } from "./brandConfig";
+
+export const MUSIC_SETTINGS_STORAGE_KEY = `${STORAGE_PREFIX}-music-settings-v1`;
 
 export type MusicSettings = {
   volume: number;

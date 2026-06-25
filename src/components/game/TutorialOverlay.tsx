@@ -83,7 +83,9 @@ function TutorialModal({
           {label}
         </p>
         <h2 className="mt-2 text-xl font-bold text-farm-sun">{title}</h2>
-        <p className="mt-3 text-sm leading-relaxed text-white/75">{body}</p>
+        <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-white/75">
+          {body}
+        </p>
         <button
           type="button"
           onClick={onAction}
@@ -205,7 +207,9 @@ export function TutorialOverlay() {
             Tutorial · {stepConfig.stepLabel}
           </p>
           <h3 className="mt-1 text-sm font-bold text-farm-sun">{stepConfig.title}</h3>
-          <p className="mt-2 text-xs leading-relaxed text-white/75">{stepConfig.body}</p>
+          <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-white/75">
+            {stepConfig.body}
+          </p>
           <button
             type="button"
             onClick={advanceStep}

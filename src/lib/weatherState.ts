@@ -6,7 +6,9 @@ import {
   type WeatherType,
 } from "./weatherConfig";
 
-export const WEATHER_STATE_STORAGE_KEY = "solfarm-weather-state-v1";
+import { STORAGE_PREFIX } from "./brandConfig";
+
+export const WEATHER_STATE_STORAGE_KEY = `${STORAGE_PREFIX}-weather-state-v1`;
 
 export type PersistedWeatherState = {
   weather: WeatherType;

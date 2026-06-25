@@ -2,7 +2,9 @@
 
 export type PlayMode = "demo" | "wallet";
 
-export const PLAY_MODE_STORAGE_KEY = "solfarm-play-mode-v1";
+import { STORAGE_PREFIX } from "./brandConfig";
+
+export const PLAY_MODE_STORAGE_KEY = `${STORAGE_PREFIX}-play-mode-v1`;
 
 /** Demo mode only allows the starter row (plot 0). */
 export const DEMO_MAX_PLOT_ID = 0;

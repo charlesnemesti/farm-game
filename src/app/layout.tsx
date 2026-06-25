@@ -20,6 +20,7 @@ import { SolanaWalletProvider } from "@/components/providers/SolanaWalletProvide
 import { WeatherEffectsLayer } from "@/components/farm/WeatherEffectsLayer";
 import { WeatherUprootToast } from "@/components/layout/WeatherUprootToast";
 import { WeatherProvider } from "@/context/WeatherProvider";
+import { CURRENCY_TICKER, GAME_NAME } from "@/lib/brandConfig";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,8 +34,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SolFarm — Web3 Farm Game",
-  description: "Web2.5 farm game on Solana",
+  title: `${GAME_NAME} — Web3 Farm Game`,
+  description: `${GAME_NAME} — Web3 farm game on Solana. Plant corn, harvest ${CURRENCY_TICKER}, and grow your farm.`,
 };
 
 export default function RootLayout({

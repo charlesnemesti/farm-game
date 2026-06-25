@@ -5,7 +5,6 @@
 :root {
   --background: #0a0a0a;
   --foreground: #f5f5f5;
-  --cursor-hand: url("/assets/ui/hand-cursor-40.png") 20 6, auto;
 }
 
 @theme inline {
@@ -29,7 +28,6 @@
 html,
 body {
   height: 100%;
-  cursor: var(--cursor-hand);
 }
 
 body {

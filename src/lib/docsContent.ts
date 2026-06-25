@@ -1,6 +1,7 @@
 // NOTE: All code must stay in English, even when requirements arrive in Spanish.
 // Central copy and figures for the public Docs page.
 
+import { GAME_NAME } from "./brandConfig";
 import { OFFLINE_HARVEST_CAP_MS } from "./harvestProgress";
 import { INVENTORY_SLOT_COUNT } from "./inventoryBoard";
 import { STARTING_CORN, WALLET_STARTING_CORN } from "./gameState";
@@ -97,7 +98,7 @@ export const DOCS_SECTIONS: DocsSection[] = [
     id: "overview",
     title: "Overview",
     paragraphs: [
-      "SolFarm is a Web3 farm game on Solana. Plant corn seeds, harvest $CORN, unlock more land, and compete on the weekly production leaderboard.",
+      `${GAME_NAME} is a Web3 farm game on Solana. Plant corn seeds, harvest $CORN, unlock more land, and compete on the weekly production leaderboard.`,
       "The in-game currency is $CORN — a fair-launch memecoin on pump.fun. Wallet mode links your on-chain balance to a custodied in-game balance backed by the treasury.",
     ],
   },

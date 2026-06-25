@@ -8,6 +8,7 @@ import { MusicControl } from "@/components/layout/MusicControl";
 import { TreasuryControls } from "@/components/layout/TreasuryControls";
 import { WalletConnectButton } from "@/components/layout/WalletConnectButton";
 import { WeatherHelpSection } from "@/components/layout/WeatherHelpSection";
+import { GAME_NAME } from "@/lib/brandConfig";
 import { isDocsRoute } from "@/lib/routes";
 import { HEADER_LOGO } from "@/lib/uiConfig";
 
@@ -27,7 +28,7 @@ export function Header() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={HEADER_LOGO.src}
-            alt="Corn Farm"
+            alt={GAME_NAME}
             draggable={false}
             className="h-auto max-w-[calc(100vw-1.5rem)] object-contain pixel-art mix-blend-screen"
             style={{ width: HEADER_LOGO.displayWidth }}
