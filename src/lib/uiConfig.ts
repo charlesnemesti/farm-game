@@ -67,6 +67,13 @@ export const MENU_TITLE = {
   screenOffsetY: 25,
 } as const;
 
+/** Header logo centered at the top of the screen. */
+export const HEADER_LOGO = {
+  src: MENU_TITLE.src,
+  displayWidth: MENU_TITLE.displayWidth * 0.8,
+  screenOffsetY: -10,
+} as const;
+
 export type ScreenPosition = {
   x: number;
   y: number;

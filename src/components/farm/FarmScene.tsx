@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 import { useTutorial } from "@/context/TutorialProvider";
+import { useDebugUi } from "@/context/DebugUiProvider";
 import { useInventoryMenu } from "@/context/InventoryMenuProvider";
 import { useCoverTransform } from "@/hooks/useCoverTransform";
 import { useSlotCalibration } from "@/hooks/useSlotCalibration";
@@ -11,7 +12,6 @@ import { FARMER_NPC } from "@/lib/npcSprites";
 import { FARM_BACKGROUND, PLOT_SLOTS } from "@/lib/plotBoard";
 import { ROUTE_POINTS } from "@/lib/routeConfig";
 import { BackpackToggle } from "@/components/game/BackpackToggle";
-import { DevDebugPanel } from "@/components/game/DevDebugPanel";
 import { InventoryDebugOverlay } from "@/components/game/InventoryDebugOverlay";
 import { InventoryMenuShell } from "@/components/game/InventoryMenuShell";
 import { DebugOverlay } from "./DebugOverlay";
@@ -37,7 +37,7 @@ function FarmSceneContent() {
     close: closeInventoryMenu,
     setPositionRatio,
   } = useInventoryMenu();
-  const [calibratorOpen, setCalibratorOpen] = useState(true);
+  const { calibratorOpen, closeCalibrator } = useDebugUi();
   const [showCropMarkers, setShowCropMarkers] = useState(false);
   const [showRouteMarkers, setShowRouteMarkers] = useState(false);
   const [showInventoryMarkers, setShowInventoryMarkers] = useState(false);
@@ -120,8 +120,6 @@ function FarmSceneContent() {
 
           {debug ? (
             <>
-              <DevDebugPanel />
-
               <DebugOverlay
                 transform={transform}
                 slots={PLOT_SLOTS}
@@ -163,17 +161,9 @@ function FarmSceneContent() {
                   onRowSpacing={calibration.adjustRowSpacing}
                   onReset={calibration.reset}
                   onCopy={calibration.copyConfig}
-                  onClose={() => setCalibratorOpen(false)}
+                  onClose={closeCalibrator}
                 />
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setCalibratorOpen(true)}
-                  className="absolute top-16 right-4 z-[120] rounded-lg border border-white/20 bg-black/80 px-3 py-2 text-xs font-semibold text-white shadow-lg backdrop-blur-sm transition hover:bg-black/90"
-                >
-                  Open calibrator
-                </button>
-              )}
+              ) : null}
             </>
           ) : null}
         </>

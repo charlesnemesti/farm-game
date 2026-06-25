@@ -181,3 +181,75 @@ body {
   animation: seed-pack-shake 0.45s ease-in-out infinite;
 }
 
+/* HUD action buttons (wallet connect, treasury) inside parchment panels */
+.hud-panel .hud-action-button,
+.hud-panel .wallet-adapter-button,
+.hud-panel .wallet-adapter-button-trigger,
+.hud-panel .hud-wallet-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 2rem !important;
+  min-height: 2rem !important;
+  padding: 0 0.25rem !important;
+  border: none !important;
+  border-radius: 0.375rem !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: #fff !important;
+  font-family: inherit !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+@media (min-width: 640px) {
+  .hud-panel .hud-action-button,
+  .hud-panel .wallet-adapter-button,
+  .hud-panel .wallet-adapter-button-trigger,
+  .hud-panel .hud-wallet-button {
+    height: 2.25rem !important;
+    min-height: 2.25rem !important;
+    padding: 0 0.5rem !important;
+    font-size: 0.875rem !important;
+  }
+}
+
+.hud-panel .hud-action-button:hover:not(:disabled),
+.hud-panel .wallet-adapter-button:not([disabled]):hover,
+.hud-panel .wallet-adapter-button-trigger:not([disabled]):hover {
+  background-color: rgba(74, 52, 40, 0.1) !important;
+}
+
+.hud-panel .hud-action-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.hud-panel .hud-action-button__icon,
+.hud-panel .wallet-adapter-button-start-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  margin-right: 6px !important;
+  border-radius: 0.375rem !important;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.hud-panel .hud-action-button__icon {
+  background: #ab9ff2;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.hud-panel .wallet-adapter-button-end-icon {
+  margin-left: 6px !important;
+}
+

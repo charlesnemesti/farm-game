@@ -10,18 +10,13 @@ export function TreasuryControls() {
   const [open, setOpen] = useState(false);
 
   const walletMode = playMode === "wallet";
-  const enabled = walletMode && walletConnected;
 
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`h-9 rounded-lg border px-3 text-xs font-semibold transition sm:text-sm ${
-          enabled
-            ? "border-farm-sun/40 bg-farm-sun/15 text-farm-sun hover:bg-farm-sun/25"
-            : "border-white/15 bg-white/5 text-white/55 hover:bg-white/10"
-        }`}
+        className="hud-action-button"
         title={
           walletMode
             ? walletConnected
@@ -30,6 +25,9 @@ export function TreasuryControls() {
             : "Switch to wallet mode to use treasury"
         }
       >
+        <span className="hud-action-button__icon" aria-hidden>
+          $
+        </span>
         Treasury
       </button>
 

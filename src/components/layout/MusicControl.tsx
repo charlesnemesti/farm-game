@@ -10,11 +10,11 @@ export function MusicControl() {
   const volumePercent = Math.round(volume * 100);
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-white/15 bg-black/30 px-2 py-1">
+    <div className="flex w-full items-center gap-1">
       <button
         type="button"
         onClick={toggleMute}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-sm transition hover:bg-white/10"
+        className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm text-[9px] leading-none text-[#4a3428] transition hover:bg-[#4a3428]/10"
         aria-label={muted ? "Unmute music" : "Mute music"}
         title={muted ? "Unmute music" : "Mute music"}
       >
@@ -27,7 +27,7 @@ export function MusicControl() {
         step={1}
         value={muted ? 0 : volumePercent}
         onChange={(event) => setVolume(Number(event.target.value) / 100)}
-        className="music-volume-slider h-1.5 w-16 cursor-pointer accent-farm-sun sm:w-20"
+        className="music-volume-slider h-1 min-w-0 flex-1 cursor-pointer accent-[#8b6914]"
         aria-label="Music volume"
         title={`Music volume: ${volumePercent}%`}
       />

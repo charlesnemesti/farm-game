@@ -3,9 +3,11 @@
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { DebugBottomBar } from "@/components/layout/DebugBottomBar";
 import { Header } from "@/components/layout/Header";
 import { ModeSelectOverlay } from "@/components/game/ModeSelectOverlay";
 import { TutorialOverlay } from "@/components/game/TutorialOverlay";
+import { DebugUiProvider } from "@/context/DebugUiProvider";
 import { DragProvider } from "@/context/DragProvider";
 import { GameProvider } from "@/context/GameProvider";
 import { InventoryMenuProvider } from "@/context/InventoryMenuProvider";
@@ -45,16 +47,19 @@ export default function RootLayout({
           <PlayModeProvider>
             <BackgroundMusicProvider>
               <GameProvider>
-                <TutorialProvider>
-                  <InventoryMenuProvider>
-                    <DragProvider>
-                      <Header />
-                      {children}
-                      <TutorialOverlay />
-                      <ModeSelectOverlay />
-                    </DragProvider>
-                  </InventoryMenuProvider>
-                </TutorialProvider>
+                <DebugUiProvider>
+                  <TutorialProvider>
+                    <InventoryMenuProvider>
+                      <DragProvider>
+                        <Header />
+                        <DebugBottomBar />
+                        {children}
+                        <TutorialOverlay />
+                        <ModeSelectOverlay />
+                      </DragProvider>
+                    </InventoryMenuProvider>
+                  </TutorialProvider>
+                </DebugUiProvider>
               </GameProvider>
             </BackgroundMusicProvider>
           </PlayModeProvider>

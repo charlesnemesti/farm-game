@@ -1,14 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 import { CornCounter } from "@/components/layout/CornCounter";
+import { HudPanel } from "@/components/layout/HudPanel";
 import { MusicControl } from "@/components/layout/MusicControl";
 import { TreasuryControls } from "@/components/layout/TreasuryControls";
-import { MENU_TITLE } from "@/lib/uiConfig";
-
-// Reminder: requirements may arrive in Spanish, but implementation language is always English.
+import { HEADER_LOGO } from "@/lib/uiConfig";
+import { HUD_PANEL } from "@/lib/hudConfig";
 
 const WalletMultiButton = dynamic(
   async () =>
@@ -16,60 +14,44 @@ const WalletMultiButton = dynamic(
   { ssr: false },
 );
 
-function CalibrateToggle() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const debug = searchParams.get("debug") === "1";
-
-  const toggleCalibrator = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (debug) {
-      params.delete("debug");
-    } else {
-      params.set("debug", "1");
-    }
-    const query = params.toString();
-    router.push(query ? `/?${query}` : "/");
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={toggleCalibrator}
-      className={`h-9 rounded-lg border px-3 text-xs font-semibold transition sm:text-sm ${
-        debug
-          ? "border-lime-400/50 bg-lime-500/20 text-lime-100 hover:bg-lime-500/30"
-          : "border-white/20 bg-white/10 text-white hover:bg-white/20"
-      }`}
-    >
-      {debug ? "Exit calibrator" : "Calibrate spots"}
-    </button>
-  );
-}
-
 export function Header() {
   return (
-    <header className="absolute top-0 right-0 left-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-sm">
-      <div className="flex h-14 items-center justify-between gap-3 px-4 sm:px-6">
-        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={MENU_TITLE.src}
-            alt="Corn Farm"
-            draggable={false}
-            className="h-9 w-auto shrink-0 object-contain pixel-art mix-blend-screen sm:h-10"
-          />
-          <WalletMultiButton className="!h-9 !rounded-lg !bg-farm-sun !text-sm !font-semibold !text-farm-wood hover:!bg-farm-sun-dark" />
-          <TreasuryControls />
-        </div>
+    <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
+      <div
+        className="pointer-events-none absolute left-1/2 z-[51] -translate-x-1/2"
+        style={{ top: HEADER_LOGO.screenOffsetY }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={HEADER_LOGO.src}
+          alt="Corn Farm"
+          draggable={false}
+          className="h-auto max-w-[calc(100vw-1.5rem)] object-contain pixel-art mix-blend-screen"
+          style={{ width: HEADER_LOGO.displayWidth }}
+        />
+      </div>
 
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+      <div
+        className="pointer-events-auto absolute top-2 left-2 flex flex-col items-start gap-1 sm:top-3 sm:left-3"
+        style={{ width: 340 }}
+      >
+        <HudPanel width={340}>
+          <WalletMultiButton className="hud-wallet-button" />
+          <TreasuryControls />
+        </HudPanel>
+        <HudPanel
+          width={340}
+          displayHeight={HUD_PANEL.musicControlHeight}
+          compact
+        >
           <MusicControl />
-          <Suspense fallback={null}>
-            <CalibrateToggle />
-          </Suspense>
+        </HudPanel>
+      </div>
+
+      <div className="pointer-events-auto absolute top-2 right-2 sm:top-3 sm:right-3">
+        <HudPanel width={230}>
           <CornCounter />
-        </div>
+        </HudPanel>
       </div>
     </header>
   );

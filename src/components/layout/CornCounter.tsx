@@ -7,14 +7,14 @@ export function CornCounter() {
 
   return (
     <div
-      className="flex items-center gap-2 rounded-lg border border-farm-sun/40 bg-black/70 px-3 py-1.5 shadow-sm backdrop-blur-sm"
+      className="flex w-full items-center justify-center gap-1.5 sm:gap-2"
       aria-label="CORN balance"
     >
-      <span className="text-base leading-none">🌽</span>
-      <span className="text-sm font-bold tabular-nums text-farm-sun">
+      <span className="text-sm leading-none sm:text-base">🌽</span>
+      <span className="text-xs font-bold tabular-nums text-[#4a3428] sm:text-sm">
         {hydrated ? corn.toLocaleString("en-US") : "—"}
       </span>
-      <span className="text-xs font-semibold text-farm-sun/80">$CORN</span>
+      <span className="text-[10px] font-bold text-[#8b6914] sm:text-xs">$CORN</span>
     </div>
   );
 }
