@@ -6,6 +6,7 @@ import { useWeather } from "@/context/WeatherProvider";
 import type { WeatherType } from "@/lib/weatherConfig";
 import { isDocsRoute } from "@/lib/routes";
 import {
+  WEATHER_EFFECTS_LAYER_OPACITY,
   WEATHER_SPRITES,
   type WeatherSpriteConfig,
 } from "@/lib/weatherSprites";
@@ -54,7 +55,7 @@ function drawTiledLayer(
   const startX = -tileW + wrapOffset(layer.offsetX, tileW);
   const startY = -tileH + wrapOffset(layer.offsetY, tileH);
 
-  ctx.globalAlpha = layer.opacity;
+  ctx.globalAlpha = layer.opacity * WEATHER_EFFECTS_LAYER_OPACITY;
 
   for (let y = startY; y < height + tileH; y += tileH) {
     for (let x = startX; x < width + tileW; x += tileW) {
