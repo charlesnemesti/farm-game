@@ -1,19 +1,13 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { CornCounter } from "@/components/layout/CornCounter";
 import { HudPanel } from "@/components/layout/HudPanel";
 import { MusicControl } from "@/components/layout/MusicControl";
 import { TreasuryControls } from "@/components/layout/TreasuryControls";
+import { WalletConnectButton } from "@/components/layout/WalletConnectButton";
 import { HEADER_LOGO } from "@/lib/uiConfig";
 import { HUD_PANEL } from "@/lib/hudConfig";
-
-const WalletMultiButton = dynamic(
-  async () =>
-    (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
-  { ssr: false },
-);
 
 const WALLET_PANEL_WIDTH = 340;
 const COMPACT_PANEL_WIDTH = WALLET_PANEL_WIDTH * 0.5;
@@ -40,8 +34,10 @@ export function Header() {
         style={{ width: WALLET_PANEL_WIDTH }}
       >
         <HudPanel width={WALLET_PANEL_WIDTH}>
-          <WalletMultiButton className="hud-wallet-button" />
-          <TreasuryControls />
+          <div className="flex w-full items-center justify-between gap-2">
+            <WalletConnectButton />
+            <TreasuryControls />
+          </div>
         </HudPanel>
         <HudPanel
           width={COMPACT_PANEL_WIDTH}
