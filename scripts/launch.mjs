@@ -101,6 +101,7 @@ async function main() {
   upsertEnvValue("NEXT_PUBLIC_CORN_TOKEN_PROGRAM", kind);
   upsertEnvValue("NEXT_PUBLIC_SOLANA_CLUSTER", "mainnet-beta");
   upsertEnvValue("NEXT_PUBLIC_TREASURY_PUBKEY", LAUNCH_TREASURY_PUBKEY);
+  upsertEnvValue("NEXT_PUBLIC_WALLET_MODE_ENABLED", "true");
 
   console.log("On-chain mint verified");
   console.log(`  Token program: ${kind}`);
@@ -120,6 +121,7 @@ async function main() {
   console.log(`NEXT_PUBLIC_CORN_TOKEN_PROGRAM=${kind}`);
   console.log(`NEXT_PUBLIC_TREASURY_PUBKEY=${LAUNCH_TREASURY_PUBKEY}`);
   console.log("NEXT_PUBLIC_SOLANA_CLUSTER=mainnet-beta");
+  console.log("NEXT_PUBLIC_WALLET_MODE_ENABLED=true");
   console.log("");
   console.log("Keep unchanged on Vercel:");
   console.log("  TREASURY_SECRET_KEY");
@@ -128,11 +130,15 @@ async function main() {
   console.log("");
   console.log("Remove / fix if present:");
   console.log("  Any invalid NEXT_PUBLIC_CORN_MINT URL");
-  console.log("  NEXT_PUBLIC_WALLET_MODE_ENABLED=false (blocks wallet mode)");
+  console.log("  Any old test mint before pasting the official CA");
+  console.log("");
+  console.log("Pre-launch on Vercel (until official CA):");
+  console.log("  Do NOT set NEXT_PUBLIC_WALLET_MODE_ENABLED=true");
+  console.log("  Delete or leave empty NEXT_PUBLIC_CORN_MINT");
   console.log("");
   console.log("── After redeploy (~2 min) ──");
   console.log("");
-  console.log("  ✓ Wallet mode opens automatically (mint is wired)");
+  console.log("  ✓ Wallet mode opens (NEXT_PUBLIC_WALLET_MODE_ENABLED=true)");
   console.log("  ✓ Deposits + server save + leaderboard go live");
   console.log("  → Fund treasury: SOL (fees) + $CORN (withdrawals / prizes)");
   console.log("  → npm run verify-treasury");

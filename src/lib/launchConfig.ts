@@ -21,13 +21,12 @@ export function isValidCornMintConfigured(): boolean {
 }
 
 /**
- * Wallet mode opens automatically once the official mint CA is wired.
- * Set NEXT_PUBLIC_WALLET_MODE_ENABLED=false to force it closed (emergency only).
+ * Wallet mode stays closed until launch explicitly sets
+ * NEXT_PUBLIC_WALLET_MODE_ENABLED=true (via npm run launch -- <CA>).
+ * A mint in env alone does not unlock wallet mode.
  */
 export function isWalletModeEnabled(): boolean {
-  const override = process.env.NEXT_PUBLIC_WALLET_MODE_ENABLED?.trim().toLowerCase();
-  if (override === "false") return false;
-  return isValidCornMintConfigured();
+  return process.env.NEXT_PUBLIC_WALLET_MODE_ENABLED === "true";
 }
 
 /** User-facing copy while wallet mode / on-chain $CORN are not live yet. */
