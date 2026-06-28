@@ -6,7 +6,11 @@ import {
   parseWalletSavePayload,
   type WalletGameStore,
 } from "@/lib/walletPersistence";
-import { readJsonStore, writeJsonStore } from "@/lib/serverStore";
+import {
+  EphemeralStoreError,
+  readJsonStore,
+  writeJsonStore,
+} from "@/lib/serverStore";
 
 export const runtime = "nodejs";
 
@@ -31,9 +35,19 @@ export async function POST(request: Request) {
     lastProgressAt: Date.now(),
   };
 
-  const store = await readJsonStore<WalletGameStore>(WALLET_GAME_STORE_FILE, {});
-  store[payload.wallet] = normalized;
-  await writeJsonStore(WALLET_GAME_STORE_FILE, store);
+  try {
+    const store = await readJsonStore<WalletGameStore>(WALLET_GAME_STORE_FILE, {});
+    store[payload.wallet] = normalized;
+    await writeJsonStore(WALLET_GAME_STORE_FILE, store);
+  } catch (error) {
+    if (error instanceof EphemeralStoreError) {
+      return NextResponse.json(
+        { error: error.message, code: "EPHEMERAL_STORAGE" },
+        { status: 503 },
+      );
+    }
+    throw error;
+  }
 
   return NextResponse.json({ ok: true, savedAt: Date.now() });
 }

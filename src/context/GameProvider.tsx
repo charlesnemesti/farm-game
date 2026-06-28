@@ -17,7 +17,6 @@ import { findPlantedCrop, type PlantedCrop } from "@/lib/cropState";
 import {
   clearAllSavedGameState,
   createInitialGameState,
-  createWalletInitialGameState,
   loadGameState,
   saveGameState,
   type GameState,
@@ -93,6 +92,7 @@ type GameContextValue = {
   addDebugXp: (amount: number) => void;
   creditTreasuryCorn: (amount: number) => void;
   debitTreasuryCorn: (amount: number) => boolean;
+  flushWalletSave: () => Promise<{ ok: boolean; error?: string }>;
   windUprootNotice: string | null;
 };
 
@@ -149,7 +149,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
 
     if (mode === "wallet" && wallet) {
-      void saveWalletGameState(wallet, next);
+      void saveWalletGameState(wallet, next, { keepalive: true });
       return;
     }
 
@@ -181,13 +181,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (playMode === "wallet" && connected && walletAddress) {
         const remote = await fetchWalletGameState(walletAddress);
         if (cancelled) return;
-        if (remote) {
+        if (remote !== null) {
           setState(remote);
           persistState(remote);
-        } else {
-          const fresh = createWalletInitialGameState();
-          setState(fresh);
-          void saveWalletGameState(walletAddress, fresh);
         }
         setHydrated(true);
         return;
@@ -699,10 +695,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
         ...prev,
         corn: prev.corn + amount,
       };
-      persistState(next);
+      flushPersist(next);
       return next;
     });
-  }, []);
+  }, [flushPersist]);
 
   const debitTreasuryCorn = useCallback((amount: number) => {
     if (amount <= 0) return false;
@@ -717,11 +713,27 @@ export function GameProvider({ children }: { children: ReactNode }) {
         ...prev,
         corn: prev.corn - amount,
       };
-      persistState(next);
+      flushPersist(next);
       return next;
     });
 
     return debited;
+  }, [flushPersist]);
+
+  const flushWalletSave = useCallback(async () => {
+    const mode = playModeRef.current;
+    const wallet = walletRef.current;
+
+    if (mode !== "wallet" || !wallet) {
+      return { ok: true };
+    }
+
+    if (walletSaveTimerRef.current !== null) {
+      window.clearTimeout(walletSaveTimerRef.current);
+      walletSaveTimerRef.current = null;
+    }
+
+    return saveWalletGameState(wallet, stateRef.current, { keepalive: true });
   }, []);
 
   const addDebugCorn = useCallback((amount: number) => {
@@ -782,6 +794,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       addDebugXp,
       creditTreasuryCorn,
       debitTreasuryCorn,
+      flushWalletSave,
       windUprootNotice,
     }),
     [
@@ -793,6 +806,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       commitOpenedSeeds,
       creditTreasuryCorn,
       debitTreasuryCorn,
+      flushWalletSave,
       discardInventoryItem,
       getCropAt,
       hydrated,

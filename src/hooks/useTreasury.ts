@@ -46,6 +46,7 @@ export function useTreasury() {
     hydrated,
     creditTreasuryCorn,
     debitTreasuryCorn,
+    flushWalletSave,
   } = useGame();
 
   const [depositAmount, setDepositAmount] = useState(String(MIN_DEPOSIT_CORN * 100));
@@ -258,6 +259,15 @@ export function useTreasury() {
       markDepositProcessed(publicKey.toBase58(), signature);
       creditTreasuryCorn(creditedAmount);
 
+      const saved = await flushWalletSave();
+      if (!saved.ok) {
+        setStatus({
+          type: "error",
+          message: `${saved.error ?? "Could not save progress."} Your tokens reached the treasury — paste this tx signature under Recover deposit: ${signature}`,
+        });
+        return;
+      }
+
       setWalletTreasuryState(loadWalletTreasuryState(publicKey.toBase58()));
       setStatus({
         type: "success",
@@ -275,6 +285,7 @@ export function useTreasury() {
   }, [
     connection,
     creditTreasuryCorn,
+    flushWalletSave,
     depositBlockReason,
     mintPubkey,
     parsedDepositAmount,

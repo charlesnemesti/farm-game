@@ -3,13 +3,36 @@
 
 import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
-import { get, head, put } from "@vercel/blob";
+import { get, head, put, type PutCommandOptions } from "@vercel/blob";
 
 const DATA_DIR = path.join(process.cwd(), ".data");
 const BLOB_PREFIX = "cornfarm-data";
 
-function useBlobStore(): boolean {
+function hasBlobStoreId(): boolean {
+  return Boolean(process.env.BLOB_STORE_ID?.trim());
+}
+
+function hasBlobReadWriteToken(): boolean {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
+}
+
+/** Blob is available when the store is linked (OIDC) or a legacy token is set. */
+function useBlobStore(): boolean {
+  return hasBlobStoreId() || hasBlobReadWriteToken();
+}
+
+/** Vercel serverless disk is ephemeral — saves are lost without Blob. */
+export function isEphemeralProductionStore(): boolean {
+  return Boolean(process.env.VERCEL) && !useBlobStore();
+}
+
+export class EphemeralStoreError extends Error {
+  constructor() {
+    super(
+      "Persistent storage is not configured. Connect Vercel Blob to this project and redeploy.",
+    );
+    this.name = "EphemeralStoreError";
+  }
 }
 
 function blobPathname(filename: string): string {
@@ -18,6 +41,22 @@ function blobPathname(filename: string): string {
 
 function localFilePath(filename: string): string {
   return path.join(DATA_DIR, filename);
+}
+
+/** Let @vercel/blob use OIDC (BLOB_STORE_ID) on Vercel; legacy token for local-only setups. */
+function blobSdkOptions(): Pick<PutCommandOptions, "token"> | undefined {
+  if (hasBlobStoreId()) {
+    return undefined;
+  }
+
+  const token = process.env.BLOB_READ_WRITE_TOKEN?.trim();
+  return token ? { token } : undefined;
+}
+
+export function getBlobAuthMode(): "oidc" | "token" | null {
+  if (hasBlobStoreId()) return "oidc";
+  if (hasBlobReadWriteToken()) return "token";
+  return null;
 }
 
 async function ensureDataDir() {
@@ -42,7 +81,7 @@ async function readBlobStore<T>(filename: string, fallback: T): Promise<T> {
   try {
     const result = await get(blobPathname(filename), {
       access: "private",
-      token: process.env.BLOB_READ_WRITE_TOKEN,
+      ...blobSdkOptions(),
     });
 
     if (!result) return fallback;
@@ -61,7 +100,7 @@ async function writeBlobStore<T>(filename: string, data: T): Promise<void> {
     access: "private",
     addRandomSuffix: false,
     allowOverwrite: true,
-    token: process.env.BLOB_READ_WRITE_TOKEN,
+    ...blobSdkOptions(),
   });
 }
 
@@ -78,6 +117,10 @@ export async function readJsonStore<T>(filename: string, fallback: T): Promise<T
 }
 
 export async function writeJsonStore<T>(filename: string, data: T): Promise<void> {
+  if (isEphemeralProductionStore()) {
+    throw new EphemeralStoreError();
+  }
+
   if (useBlobStore()) {
     await writeBlobStore(filename, data);
     return;
@@ -90,9 +133,7 @@ export async function migrateLocalStoreToBlob(filename: string): Promise<boolean
   if (!useBlobStore()) return false;
 
   try {
-    await head(blobPathname(filename), {
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    });
+    await head(blobPathname(filename), blobSdkOptions());
     return false;
   } catch {
     // Blob missing — proceed with migration.

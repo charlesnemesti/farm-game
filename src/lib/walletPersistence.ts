@@ -39,11 +39,23 @@ export async function fetchWalletGameState(wallet: string): Promise<GameState | 
 export async function saveWalletGameState(
   wallet: string,
   state: GameState,
-): Promise<boolean> {
-  const response = await fetch("/api/game/save", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ wallet, state }),
-  });
-  return response.ok;
+  options?: { keepalive?: boolean },
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const response = await fetch("/api/game/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ wallet, state }),
+      keepalive: options?.keepalive ?? false,
+    });
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
+      return { ok: false, error: payload.error ?? "Could not save game progress." };
+    }
+
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Could not save game progress." };
+  }
 }

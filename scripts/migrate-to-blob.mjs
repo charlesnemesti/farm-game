@@ -31,9 +31,17 @@ function blobPath(filename) {
   return `${BLOB_PREFIX}/${filename}`;
 }
 
+function blobSdkOptions() {
+  if (process.env.BLOB_STORE_ID?.trim()) {
+    return {};
+  }
+  const token = process.env.BLOB_READ_WRITE_TOKEN?.trim();
+  return token ? { token } : null;
+}
+
 async function blobExists(filename) {
   try {
-    await head(blobPath(filename), { token: process.env.BLOB_READ_WRITE_TOKEN });
+    await head(blobPath(filename), blobSdkOptions() ?? {});
     return true;
   } catch {
     return false;
@@ -43,13 +51,13 @@ async function blobExists(filename) {
 async function main() {
   loadEnvLocal();
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN?.trim()) {
-    console.error("BLOB_READ_WRITE_TOKEN is missing.");
+  const blobOptions = blobSdkOptions();
+  if (!blobOptions) {
+    console.error("Blob credentials missing (need BLOB_STORE_ID or BLOB_READ_WRITE_TOKEN).");
     console.error("");
-    console.error("1. Vercel Dashboard → corn-farm → Storage → Create Blob Store");
-    console.error("2. Connect store to this project (auto-adds env var)");
-    console.error("3. Pull env: vercel env pull .env.local");
-    console.error("4. Re-run: npm run migrate-to-blob");
+    console.error("1. Vercel Dashboard → corn-farm → Storage → connect corn-farm-blob");
+    console.error("2. Pull env: vercel env pull .env.local");
+    console.error("3. Re-run: npm run migrate-to-blob");
     process.exit(1);
   }
 
@@ -71,7 +79,7 @@ async function main() {
       access: "private",
       addRandomSuffix: false,
       allowOverwrite: false,
-      token: process.env.BLOB_READ_WRITE_TOKEN,
+      ...blobOptions,
     });
 
     console.log(`Migrated ${file} → Vercel Blob`);

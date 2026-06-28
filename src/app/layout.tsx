@@ -6,6 +6,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { DebugBottomBar } from "@/components/layout/DebugBottomBar";
 import { Header } from "@/components/layout/Header";
 import { DemoConnectBanner } from "@/components/game/DemoConnectBanner";
+import { StorageWarningBanner } from "@/components/game/StorageWarningBanner";
 import { PlayModeShell } from "@/components/game/PlayModeShell";
 import { TutorialOverlay } from "@/components/game/TutorialOverlay";
 import { TutorialReplayButton } from "@/components/layout/TutorialReplayButton";
@@ -67,6 +68,7 @@ export default function RootLayout({
                             <TutorialOverlay />
                             <TutorialReplayButton />
                             <DemoConnectBanner />
+                            <StorageWarningBanner />
                           </PlayModeShell>
                         </DragProvider>
                       </InventoryMenuProvider>
