@@ -9,7 +9,8 @@
     "lint": "eslint",
     "generate-treasury": "node scripts/generate-treasury.mjs",
     "configure-token": "node scripts/configure-token.mjs",
-    "set-launch-mint": "node scripts/set-launch-mint.mjs",
+    "launch": "node scripts/launch.mjs",
+    "set-launch-mint": "node scripts/launch.mjs",
     "verify-treasury": "node scripts/verify-treasury.mjs",
     "migrate-to-blob": "node scripts/migrate-to-blob.mjs"
   },

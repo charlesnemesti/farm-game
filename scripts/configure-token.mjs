@@ -78,7 +78,8 @@ async function main() {
 
   const mintAddress = process.argv[2]?.trim();
   if (!mintAddress) {
-    console.error("Usage: npm run configure-token -- <PUMP_FUN_MINT_CA>");
+    console.error("Usage: npm run launch -- <OFFICIAL_PUMP_FUN_MINT_CA>");
+    console.error("(configure-token is deprecated — use launch instead)");
     console.error("");
     console.error("Example:");
     console.error("  npm run configure-token -- 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU");

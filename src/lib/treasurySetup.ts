@@ -12,6 +12,7 @@ import {
   getTreasuryPublicKey,
   rawAmountToCorn,
 } from "./treasuryConfig";
+import { isWalletModeEnabled } from "./launchConfig";
 import { loadTreasuryKeypair } from "./treasuryServer";
 import {
   fetchMintOnChainInfo,
@@ -41,6 +42,7 @@ export type TreasuryPublicConfig = {
   tokenProgram: "spl" | "token-2022" | "auto";
   depositsEnabled: boolean;
   withdrawalsEnabled: boolean;
+  walletModeEnabled: boolean;
 };
 
 export type TreasuryLiveStatus = TreasuryPublicConfig & {
@@ -86,6 +88,7 @@ export function getTreasuryPublicConfig(): TreasuryPublicConfig {
     tokenProgram: getTokenProgramEnv(),
     depositsEnabled: Boolean(mint && treasury),
     withdrawalsEnabled: Boolean(mint && treasury && signer),
+    walletModeEnabled: isWalletModeEnabled(),
   };
 }
 

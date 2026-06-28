@@ -70,7 +70,7 @@ async function main() {
 
   if (!mintAddress) {
     console.log("✗ NEXT_PUBLIC_CORN_MINT is missing");
-    console.log("  Run: npm run configure-token -- <PUMP_FUN_MINT_CA>");
+    console.log("  Run: npm run launch -- <OFFICIAL_PUMP_FUN_MINT_CA>");
     process.exit(1);
   }
 
