@@ -5,8 +5,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { DebugBottomBar } from "@/components/layout/DebugBottomBar";
 import { Header } from "@/components/layout/Header";
-import { ModeSelectOverlay } from "@/components/game/ModeSelectOverlay";
 import { DemoConnectBanner } from "@/components/game/DemoConnectBanner";
+import { PlayModeShell } from "@/components/game/PlayModeShell";
 import { TutorialOverlay } from "@/components/game/TutorialOverlay";
 import { TutorialReplayButton } from "@/components/layout/TutorialReplayButton";
 import { DebugUiProvider } from "@/context/DebugUiProvider";
@@ -58,15 +58,16 @@ export default function RootLayout({
                     <TutorialProvider>
                       <InventoryMenuProvider>
                         <DragProvider>
-                          <Header />
-                          <WeatherEffectsLayer />
-                          <WeatherUprootToast />
-                          <DebugBottomBar />
-                          {children}
-                          <TutorialOverlay />
-                          <TutorialReplayButton />
-                          <ModeSelectOverlay />
-                          <DemoConnectBanner />
+                          <PlayModeShell>
+                            <Header />
+                            <WeatherEffectsLayer />
+                            <WeatherUprootToast />
+                            <DebugBottomBar />
+                            {children}
+                            <TutorialOverlay />
+                            <TutorialReplayButton />
+                            <DemoConnectBanner />
+                          </PlayModeShell>
                         </DragProvider>
                       </InventoryMenuProvider>
                     </TutorialProvider>

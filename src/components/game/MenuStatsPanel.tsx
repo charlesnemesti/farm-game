@@ -21,7 +21,7 @@ type MenuStatsPanelProps = {
 // Production, level, XP, and weekly leaderboard entry in the menu Stats section.
 export function MenuStatsPanel({ menuLayout }: MenuStatsPanelProps) {
   const { plantedCrops, xp, hydrated } = useGame();
-  const { playMode } = usePlayMode();
+  const { playMode, signOut, switchPlayMode } = usePlayMode();
   const { weather } = useWeather();
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const { position: menuPosition, scale } = menuLayout;
@@ -67,6 +67,22 @@ export function MenuStatsPanel({ menuLayout }: MenuStatsPanelProps) {
         >
           {playMode === "wallet" ? "Weekly rank" : "Leaderboard"}
         </button>
+        <div className="pointer-events-auto mt-2 flex flex-wrap items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={switchPlayMode}
+            className="rounded-md border border-[#4a3428]/25 bg-[#f5e6c8]/80 px-2 py-0.5 text-[0.78em] font-bold text-[#4a3428] transition hover:bg-[#f5e6c8]"
+          >
+            Switch mode
+          </button>
+          <button
+            type="button"
+            onClick={signOut}
+            className="rounded-md border border-[#4a3428]/25 bg-[#f5e6c8]/80 px-2 py-0.5 text-[0.78em] font-bold text-[#4a3428] transition hover:bg-[#f5e6c8]"
+          >
+            Sign out
+          </button>
+        </div>
       </div>
 
       <LeaderboardPanel open={leaderboardOpen} onClose={() => setLeaderboardOpen(false)} />

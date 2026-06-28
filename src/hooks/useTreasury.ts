@@ -10,6 +10,7 @@ import {
   WITHDRAW_MIN_LEVEL,
   formatCooldown,
   formatCornAmount,
+  getClusterLabel,
   getCornMintPublicKey,
   getTreasuryPublicKey,
 } from "@/lib/treasuryConfig";
@@ -21,6 +22,7 @@ import {
   verifyCornDepositTransaction,
   type TreasuryBlockReason,
 } from "@/lib/treasury";
+import { waitForSignatureConfirmation } from "@/lib/transactionConfirm";
 import {
   isDepositProcessed,
   loadWalletTreasuryState,
@@ -168,10 +170,15 @@ export function useTreasury() {
       const signature = await sendTransaction(transaction, connection);
       setStatus({ type: "loading", message: "Confirming deposit on-chain…" });
 
-      await connection.confirmTransaction(
-        { signature, blockhash, lastValidBlockHeight },
-        "confirmed",
-      );
+      try {
+        await waitForSignatureConfirmation(connection, signature);
+      } catch {
+        // Wallet may have confirmed via its own RPC even if our proxy is slow.
+        setStatus({
+          type: "loading",
+          message: "Verifying deposit on-chain…",
+        });
+      }
 
       if (isDepositProcessed(publicKey.toBase58(), signature)) {
         setStatus({
@@ -181,33 +188,66 @@ export function useTreasury() {
         return;
       }
 
-      const verified = await verifyCornDepositTransaction(
-        connection,
-        signature,
-        publicKey,
-        treasuryPubkey,
-        amount,
-      );
+      let creditedAmount = amount;
+      let verified = false;
+
+      try {
+        const verifyResponse = await fetch("/api/treasury/deposit/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            signature,
+            wallet: publicKey.toBase58(),
+          }),
+        });
+
+        const verifyPayload = (await verifyResponse.json()) as {
+          verified?: boolean;
+          amount?: number;
+        };
+
+        verified = verifyResponse.ok && verifyPayload.verified === true;
+        if (verified && typeof verifyPayload.amount === "number") {
+          creditedAmount = verifyPayload.amount;
+        }
+      } catch {
+        verified = false;
+      }
+
+      if (!verified) {
+        verified = await verifyCornDepositTransaction(
+          connection,
+          signature,
+          publicKey,
+          treasuryPubkey,
+          amount,
+        );
+      }
 
       if (!verified) {
         setStatus({
           type: "error",
-          message: "Deposit transaction could not be verified.",
+          message:
+            "Deposit reached the treasury but could not be verified yet. Wait a few seconds and try again — your SPL test token counts as in-game $CORN.",
         });
         return;
       }
 
       markDepositProcessed(publicKey.toBase58(), signature);
-      creditTreasuryCorn(amount);
+      creditTreasuryCorn(creditedAmount);
 
       setWalletTreasuryState(loadWalletTreasuryState(publicKey.toBase58()));
       setStatus({
         type: "success",
-        message: `Deposited ${formatCornAmount(amount)}. In-game balance updated.`,
+        message: `Deposited ${formatCornAmount(creditedAmount)}. In-game balance updated.`,
       });
     } catch (error) {
-      const message =
+      let message =
         error instanceof Error ? error.message : "Deposit failed. Try again.";
+      if (message.includes("403") || message.includes("Access forbidden")) {
+        message =
+          "Solana RPC blocked the request. Refresh the page and try again — requests now route through the server proxy.";
+      }
       setStatus({ type: "error", message });
     }
   }, [
@@ -312,6 +352,65 @@ export function useTreasury() {
     setStatus({ type: "idle", message: "" });
   }, []);
 
+  const claimDeposit = useCallback(
+    async (signature: string) => {
+      if (!publicKey || !treasuryPubkey) return;
+
+      const trimmed = signature.trim();
+      if (!trimmed) return;
+
+      if (isDepositProcessed(publicKey.toBase58(), trimmed)) {
+        setStatus({
+          type: "success",
+          message: "This deposit was already credited.",
+        });
+        return;
+      }
+
+      setStatus({ type: "loading", message: "Recovering deposit from chain…" });
+
+      try {
+        const verifyResponse = await fetch("/api/treasury/deposit/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            signature: trimmed,
+            wallet: publicKey.toBase58(),
+          }),
+        });
+
+        const verifyPayload = (await verifyResponse.json()) as {
+          verified?: boolean;
+          amount?: number;
+          error?: string;
+        };
+
+        if (!verifyResponse.ok || !verifyPayload.verified || !verifyPayload.amount) {
+          setStatus({
+            type: "error",
+            message:
+              verifyPayload.error ??
+              "Could not verify that deposit. Check the signature matches your wallet.",
+          });
+          return;
+        }
+
+        markDepositProcessed(publicKey.toBase58(), trimmed);
+        creditTreasuryCorn(verifyPayload.amount);
+        setWalletTreasuryState(loadWalletTreasuryState(publicKey.toBase58()));
+        setStatus({
+          type: "success",
+          message: `Recovered ${formatCornAmount(verifyPayload.amount)} in-game.`,
+        });
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Recovery failed.";
+        setStatus({ type: "error", message });
+      }
+    },
+    [creditTreasuryCorn, publicKey, treasuryPubkey],
+  );
+
   const withdrawHint = useMemo(() => {
     if (!walletMode) return "Available in wallet mode only.";
     if (!connected) return "Connect your wallet first.";
@@ -343,7 +442,7 @@ export function useTreasury() {
     if (!connected) return "Connect your wallet first.";
     if (!treasuryPubkey) return "Treasury wallet is not configured.";
     if (!mintPubkey) return "$CORN mint is not configured.";
-    return `Send SPL $CORN to the treasury wallet — credited 1:1 in-game (min ${MIN_DEPOSIT_CORN}).`;
+    return `Send SPL tokens (${getClusterLabel()}) to the treasury — credited 1:1 as in-game $CORN (min ${MIN_DEPOSIT_CORN}). Test mints work the same as the real $CORN token.`;
   }, [connected, mintPubkey, treasuryPubkey, walletMode]);
 
   return {
@@ -351,6 +450,7 @@ export function useTreasury() {
     canWithdraw,
     deposit,
     withdraw,
+    claimDeposit,
     status,
     clearStatus,
     depositAmount,

@@ -4,13 +4,13 @@ import type { SeedRarity } from "./seedConfig";
 
 /** XP granted when a crop completes one harvest cycle. */
 export const XP_PER_CYCLE: Record<SeedRarity, number> = {
-  common: 10,
-  rare: 25,
-  epic: 50,
+  common: 12,
+  rare: 30,
+  epic: 60,
 };
 
 /** Base XP required to advance from level L to level L + 1. */
-export const XP_PER_LEVEL_STEP = 100;
+export const XP_PER_LEVEL_STEP = 140;
 
 export function xpToReachLevel(level: number): number {
   if (level <= 1) return 0;

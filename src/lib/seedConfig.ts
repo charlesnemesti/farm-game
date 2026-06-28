@@ -50,18 +50,18 @@ export type SeedStats = {
 export const SEED_STATS: Record<SeedRarity, SeedStats> = {
   common: {
     description: "A reliable staple crop with steady harvest rewards.",
-    harvestCycleSeconds: 120,
-    cornPerCycle: 10,
+    harvestCycleSeconds: 150,
+    cornPerCycle: 280,
   },
   rare: {
     description: "Grows faster and yields more $CORN each cycle.",
-    harvestCycleSeconds: 90,
-    cornPerCycle: 25,
+    harvestCycleSeconds: 110,
+    cornPerCycle: 700,
   },
   epic: {
     description: "Premium corn with the shortest cycle and highest payout.",
-    harvestCycleSeconds: 60,
-    cornPerCycle: 50,
+    harvestCycleSeconds: 75,
+    cornPerCycle: 1_400,
   },
 };
 

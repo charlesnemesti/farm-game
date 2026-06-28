@@ -17,6 +17,7 @@ export function TreasuryPanel({ open, onClose }: TreasuryPanelProps) {
     canWithdraw,
     deposit,
     withdraw,
+    claimDeposit,
     status,
     clearStatus,
     depositAmount,
@@ -35,6 +36,7 @@ export function TreasuryPanel({ open, onClose }: TreasuryPanelProps) {
     minWithdrawCorn,
   } = useTreasury();
   const [mounted, setMounted] = useState(false);
+  const [recoverSignature, setRecoverSignature] = useState("");
 
   useEffect(() => {
     setMounted(true);
@@ -141,6 +143,35 @@ export function TreasuryPanel({ open, onClose }: TreasuryPanelProps) {
               className="mt-3 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-45"
             >
               Withdraw $CORN
+            </button>
+          </section>
+
+          <section className="rounded-lg border border-white/10 bg-black/40 p-3">
+            <h3 className="text-xs font-semibold text-white/80">
+              Recover a stuck deposit
+            </h3>
+            <p className="mt-1 text-[11px] text-white/50">
+              Paste the Solscan transaction signature — amount is read automatically
+              from chain and credited as in-game $CORN.
+            </p>
+            <label className="mt-2 block text-[11px] font-medium text-white/70">
+              Transaction signature
+              <input
+                type="text"
+                value={recoverSignature}
+                onChange={(event) => setRecoverSignature(event.target.value)}
+                disabled={isLoading}
+                className="mt-1 w-full rounded-lg border border-white/15 bg-black/50 px-3 py-2 text-xs text-white outline-none focus:border-white/35 disabled:opacity-50"
+                placeholder="Paste full Solscan tx signature"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => void claimDeposit(recoverSignature)}
+              disabled={isLoading || !recoverSignature.trim()}
+              className="mt-2 w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-45"
+            >
+              Recover deposit
             </button>
           </section>
         </div>

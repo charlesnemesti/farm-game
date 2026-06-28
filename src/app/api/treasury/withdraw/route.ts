@@ -9,8 +9,6 @@ import {
   createAssociatedTokenAccountIdempotentInstruction,
   createTransferInstruction,
   getAccount,
-  getAssociatedTokenAddressSync,
-  TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
   cornToRawAmount,
@@ -20,6 +18,10 @@ import {
   getSolanaRpcEndpoint,
 } from "@/lib/treasuryConfig";
 import { loadTreasuryKeypair } from "@/lib/treasuryServer";
+import {
+  getCornAssociatedTokenAddress,
+  resolveMintTokenProgram,
+} from "@/lib/splToken";
 
 export const runtime = "nodejs";
 
@@ -95,8 +97,17 @@ export async function POST(request: Request) {
 
   const connection = new Connection(getSolanaRpcEndpoint(), "confirmed");
   const treasuryPubkey = treasuryKeypair.publicKey;
-  const treasuryAta = getAssociatedTokenAddressSync(mintPubkey, treasuryPubkey);
-  const destinationAta = getAssociatedTokenAddressSync(mintPubkey, destination);
+  const { programId } = await resolveMintTokenProgram(connection, mintPubkey);
+  const treasuryAta = getCornAssociatedTokenAddress(
+    mintPubkey,
+    treasuryPubkey,
+    programId,
+  );
+  const destinationAta = getCornAssociatedTokenAddress(
+    mintPubkey,
+    destination,
+    programId,
+  );
   const amountRaw = cornToRawAmount(withdrawCorn);
 
   const solBalance = await connection.getBalance(treasuryPubkey);
@@ -108,7 +119,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const treasuryToken = await getAccount(connection, treasuryAta);
+    const treasuryToken = await getAccount(connection, treasuryAta, undefined, programId);
     if (BigInt(treasuryToken.amount) < amountRaw) {
       return NextResponse.json(
         { error: "Treasury does not have enough $CORN for this withdrawal." },
@@ -133,6 +144,7 @@ export async function POST(request: Request) {
           destinationAta,
           destination,
           mintPubkey,
+          programId,
         ),
       );
     }
@@ -144,7 +156,7 @@ export async function POST(request: Request) {
         treasuryPubkey,
         amountRaw,
         [],
-        TOKEN_PROGRAM_ID,
+        programId,
       ),
     );
 

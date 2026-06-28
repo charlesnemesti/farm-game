@@ -22,6 +22,7 @@ import {
   formatCooldown,
 } from "./treasuryConfig";
 import { WEEKLY_PRIZE_TIERS } from "./leaderboard";
+import { XP_PER_CYCLE, XP_PER_LEVEL_STEP, xpToReachLevel } from "./levelConfig";
 import {
   WEATHER_CYCLE_MS,
   WEATHER_ROLL_WEIGHTS,
@@ -205,13 +206,14 @@ export const DOCS_SECTIONS: DocsSection[] = [
     title: "XP & levels",
     paragraphs: [
       "You earn XP every time a crop completes a harvest cycle. Higher rarity seeds grant more XP per cycle.",
-      "Leveling unlocks new plot rows (see Farm & plots). Withdrawals from the treasury require level 10.",
+      `Plot rows unlock every 5 levels (${TOKENOMICS.levelProgression.rowUnlockLevels.join(", ")}). Level ${WITHDRAW_MIN_LEVEL} unlocks both SPL withdrawals and row 3 — ${TOKENOMICS.levelProgression.summary}`,
     ],
     bullets: [
-      "Common harvest: 10 XP per cycle",
-      "Rare harvest: 25 XP per cycle",
-      "Epic harvest: 50 XP per cycle",
-      "XP per level increases progressively — check the menu Stats panel for your current level and progress.",
+      `Common harvest: ${XP_PER_CYCLE.common} XP per cycle`,
+      `Rare harvest: ${XP_PER_CYCLE.rare} XP per cycle`,
+      `Epic harvest: ${XP_PER_CYCLE.epic} XP per cycle`,
+      `XP per level step: ${XP_PER_LEVEL_STEP} (total to reach level 10: ${xpToReachLevel(10).toLocaleString("en-US")} XP)`,
+      "Check the menu Stats panel for your current level and progress.",
     ],
   },
   {
@@ -229,6 +231,7 @@ export const DOCS_SECTIONS: DocsSection[] = [
       TOKENOMICS.launchSummary,
       `Total supply: ${TOKENOMICS.totalSupply.toLocaleString("en-US")} ${TOKENOMICS.symbol} on ${TOKENOMICS.launchPlatform}.`,
       TOKENOMICS.graduation,
+      `Price anchor at graduation: ~$${TOKENOMICS.priceAnchor.targetMarketCapUsd.toLocaleString("en-US")} market cap → ~$${TOKENOMICS.priceAnchor.tokenPriceAtGraduation} per token → Seeds Pack (${TOKENOMICS.priceAnchor.seedsPackCorn.toLocaleString("en-US")} $CORN) ≈ $${TOKENOMICS.priceAnchor.seedsPackUsdAtGraduation} USD.`,
     ],
     bullets: TOKENOMICS.sinks.map((item) => item),
   },
@@ -237,6 +240,7 @@ export const DOCS_SECTIONS: DocsSection[] = [
     title: "Treasury",
     paragraphs: [
       TOKENOMICS.treasury.backsWithdrawals,
+      TOKENOMICS.treasury.flowSummary,
       TOKENOMICS.treasury.manualSeed,
       TOKENOMICS.treasury.organicGrowth,
       `Withdrawals unlock at level ${WITHDRAW_MIN_LEVEL}. ${TOKENOMICS.treasury.withdrawGateReason}`,

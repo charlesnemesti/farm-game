@@ -11,8 +11,7 @@ import {
 } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
-  loadPlayMode,
-  savePlayMode,
+  clearPlayMode,
   type PlayMode,
 } from "@/lib/playMode";
 
@@ -24,23 +23,39 @@ type PlayModeContextValue = {
   gateActive: boolean;
   canPlay: boolean;
   selectPlayMode: (mode: PlayMode) => void;
+  /** Return to login and disconnect wallet. */
+  signOut: () => void;
+  /** Return to login to pick Demo or Wallet again. */
+  switchPlayMode: () => void;
 };
 
 const PlayModeContext = createContext<PlayModeContextValue | null>(null);
 
 export function PlayModeProvider({ children }: { children: ReactNode }) {
-  const { connected } = useWallet();
+  const { connected, disconnect } = useWallet();
   const [playMode, setPlayMode] = useState<PlayMode | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setPlayMode(loadPlayMode());
+    clearPlayMode();
     setHydrated(true);
   }, []);
 
   const selectPlayMode = useCallback((mode: PlayMode) => {
-    savePlayMode(mode);
     setPlayMode(mode);
+  }, []);
+
+  const signOut = useCallback(() => {
+    clearPlayMode();
+    setPlayMode(null);
+    if (connected) {
+      void disconnect();
+    }
+  }, [connected, disconnect]);
+
+  const switchPlayMode = useCallback(() => {
+    clearPlayMode();
+    setPlayMode(null);
   }, []);
 
   const gateActive =
@@ -59,8 +74,19 @@ export function PlayModeProvider({ children }: { children: ReactNode }) {
       gateActive,
       canPlay,
       selectPlayMode,
+      signOut,
+      switchPlayMode,
     }),
-    [connected, gateActive, canPlay, hydrated, playMode, selectPlayMode],
+    [
+      connected,
+      gateActive,
+      canPlay,
+      hydrated,
+      playMode,
+      selectPlayMode,
+      signOut,
+      switchPlayMode,
+    ],
   );
 
   return (

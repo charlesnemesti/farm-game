@@ -28,7 +28,7 @@ export type GameState = {
 };
 
 export const GAME_STATE_STORAGE_KEY = `${STORAGE_PREFIX}-game-state-v1`;
-export const STARTING_CORN = 5_000;
+export const STARTING_CORN = 286_000;
 export const WALLET_STARTING_CORN = 0;
 
 export function createEmptyInventory(): (InventoryEntry | null)[] {

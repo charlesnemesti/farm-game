@@ -9,18 +9,21 @@ import {
 import {
   createAssociatedTokenAccountIdempotentInstruction,
   createTransferInstruction,
-  getAssociatedTokenAddressSync,
-  TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
   cornToRawAmount,
   getCornMintPublicKey,
   MIN_DEPOSIT_CORN,
   MIN_WITHDRAW_CORN,
+  rawAmountToCorn,
   WITHDRAW_COOLDOWN_MS,
   WITHDRAW_MIN_LEVEL,
   getTreasuryPublicKey,
 } from "./treasuryConfig";
+import {
+  getCornAssociatedTokenAddress,
+  getResolvedMintTokenProgramId,
+} from "./splToken";
 
 export type TreasuryBlockReason =
   | "wallet-not-connected"
@@ -48,23 +51,26 @@ export async function buildCornDepositTransaction(
     throw new Error(`Minimum deposit is ${MIN_DEPOSIT_CORN} $CORN.`);
   }
 
-  const senderAta = getAssociatedTokenAddressSync(mintPubkey, fromPubkey);
-  const treasuryAta = getAssociatedTokenAddressSync(mintPubkey, treasuryPubkey);
+  const programId = getResolvedMintTokenProgramId();
+  const senderAta = getCornAssociatedTokenAddress(mintPubkey, fromPubkey, programId);
+  const treasuryAta = getCornAssociatedTokenAddress(
+    mintPubkey,
+    treasuryPubkey,
+    programId,
+  );
   const amountRaw = cornToRawAmount(depositCorn);
 
   const transaction = new Transaction();
 
-  const treasuryAtaInfo = await connection.getAccountInfo(treasuryAta);
-  if (!treasuryAtaInfo) {
-    transaction.add(
-      createAssociatedTokenAccountIdempotentInstruction(
-        fromPubkey,
-        treasuryAta,
-        treasuryPubkey,
-        mintPubkey,
-      ),
-    );
-  }
+  transaction.add(
+    createAssociatedTokenAccountIdempotentInstruction(
+      fromPubkey,
+      treasuryAta,
+      treasuryPubkey,
+      mintPubkey,
+      programId,
+    ),
+  );
 
   transaction.add(
     createTransferInstruction(
@@ -73,11 +79,123 @@ export async function buildCornDepositTransaction(
       fromPubkey,
       amountRaw,
       [],
-      TOKEN_PROGRAM_ID,
+      programId,
     ),
   );
 
   return transaction;
+}
+
+export type ParsedCornDeposit = {
+  amount: number;
+  amountRaw: bigint;
+};
+
+type TokenBalanceEntry = {
+  accountIndex: number;
+  mint: string;
+  owner?: string;
+  uiTokenAmount: { amount: string };
+};
+
+function parseDepositFromMeta(
+  pre: TokenBalanceEntry[],
+  post: TokenBalanceEntry[],
+  accountKeys: string[],
+  mint: string,
+  sender: string,
+  treasury: string,
+  treasuryAta: string,
+): ParsedCornDeposit | null {
+  const sumMintBalance = (
+    balances: TokenBalanceEntry[],
+    filter: (entry: TokenBalanceEntry) => boolean,
+  ) =>
+    balances
+      .filter((entry) => entry.mint === mint && filter(entry))
+      .reduce((sum, entry) => sum + BigInt(entry.uiTokenAmount.amount), BigInt(0));
+
+  const treasuryDeltaByOwner =
+    sumMintBalance(post, (entry) => entry.owner === treasury) -
+    sumMintBalance(pre, (entry) => entry.owner === treasury);
+
+  const treasuryDeltaByAta =
+    sumMintBalance(
+      post,
+      (entry) => accountKeys[entry.accountIndex] === treasuryAta,
+    ) -
+    sumMintBalance(
+      pre,
+      (entry) => accountKeys[entry.accountIndex] === treasuryAta,
+    );
+
+  const treasuryDelta =
+    treasuryDeltaByAta > BigInt(0) ? treasuryDeltaByAta : treasuryDeltaByOwner;
+
+  const senderDelta =
+    sumMintBalance(post, (entry) => entry.owner === sender) -
+    sumMintBalance(pre, (entry) => entry.owner === sender);
+
+  if (treasuryDelta <= BigInt(0) || senderDelta >= BigInt(0)) return null;
+  if (treasuryDelta !== -senderDelta) return null;
+
+  const amount = rawAmountToCorn(treasuryDelta);
+  if (amount < MIN_DEPOSIT_CORN) return null;
+
+  return { amount, amountRaw: treasuryDelta };
+}
+
+/** Read deposit amount from an on-chain treasury transfer (signature only). */
+export async function parseCornDepositFromTransaction(
+  connection: Connection,
+  signature: TransactionSignature,
+  expectedSender: PublicKey,
+  treasuryPubkey: PublicKey,
+  maxRetries = 12,
+): Promise<ParsedCornDeposit | null> {
+  const mintPubkey = getCornMintPublicKey();
+  if (!mintPubkey) return null;
+
+  const mint = mintPubkey.toBase58();
+  const sender = expectedSender.toBase58();
+  const treasury = treasuryPubkey.toBase58();
+  const programId = getResolvedMintTokenProgramId();
+  const treasuryAta = getCornAssociatedTokenAddress(
+    mintPubkey,
+    treasuryPubkey,
+    programId,
+  ).toBase58();
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const response = await connection.getTransaction(signature, {
+      commitment: "confirmed",
+      maxSupportedTransactionVersion: 0,
+    });
+
+    if (response?.meta && !response.meta.err) {
+      const accountKeys = response.transaction.message
+        .getAccountKeys()
+        .staticAccountKeys.map((key) => key.toBase58());
+
+      const parsed = parseDepositFromMeta(
+        response.meta.preTokenBalances ?? [],
+        response.meta.postTokenBalances ?? [],
+        accountKeys,
+        mint,
+        sender,
+        treasury,
+        treasuryAta,
+      );
+
+      if (parsed) return parsed;
+    }
+
+    if (attempt < maxRetries - 1) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    }
+  }
+
+  return null;
 }
 
 export async function verifyCornDepositTransaction(
@@ -86,42 +204,18 @@ export async function verifyCornDepositTransaction(
   expectedSender: PublicKey,
   treasuryPubkey: PublicKey,
   expectedCorn: number,
+  maxRetries = 10,
 ): Promise<boolean> {
-  const mintPubkey = getCornMintPublicKey();
-  if (!mintPubkey) return false;
+  const parsed = await parseCornDepositFromTransaction(
+    connection,
+    signature,
+    expectedSender,
+    treasuryPubkey,
+    maxRetries,
+  );
 
-  const expectedRaw = cornToRawAmount(expectedCorn);
-  const response = await connection.getTransaction(signature, {
-    commitment: "confirmed",
-    maxSupportedTransactionVersion: 0,
-  });
-
-  if (!response?.meta || response.meta.err) return false;
-
-  const mint = mintPubkey.toBase58();
-  const sender = expectedSender.toBase58();
-  const treasury = treasuryPubkey.toBase58();
-
-  const pre = response.meta.preTokenBalances ?? [];
-  const post = response.meta.postTokenBalances ?? [];
-
-  const getBalance = (
-    balances: typeof pre,
-    owner: string,
-  ): bigint => {
-    const entry = balances.find(
-      (balance) => balance.mint === mint && balance.owner === owner,
-    );
-    if (!entry) return BigInt(0);
-    return BigInt(entry.uiTokenAmount.amount);
-  };
-
-  const senderDelta =
-    getBalance(post, sender) - getBalance(pre, sender);
-  const treasuryDelta =
-    getBalance(post, treasury) - getBalance(pre, treasury);
-
-  return senderDelta === -expectedRaw && treasuryDelta === expectedRaw;
+  if (!parsed) return false;
+  return parsed.amountRaw >= cornToRawAmount(expectedCorn);
 }
 
 export function getWithdrawBlockReason(
