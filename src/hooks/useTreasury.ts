@@ -57,6 +57,7 @@ export function useTreasury() {
   const [walletTreasuryState, setWalletTreasuryState] = useState(() =>
     publicKey ? loadWalletTreasuryState(publicKey.toBase58()) : null,
   );
+  const [withdrawalsEnabled, setWithdrawalsEnabled] = useState<boolean | null>(null);
 
   const walletAddress = publicKey?.toBase58() ?? null;
   const treasuryPubkey = getTreasuryPublicKey();
@@ -79,6 +80,25 @@ export function useTreasury() {
 
     setWalletTreasuryState(loadWalletTreasuryState(walletAddress));
   }, [walletAddress, status.type]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/treasury/config")
+      .then((response) => response.json())
+      .then((payload: { withdrawalsEnabled?: boolean }) => {
+        if (!cancelled) {
+          setWithdrawalsEnabled(payload.withdrawalsEnabled === true);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setWithdrawalsEnabled(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const lastWithdrawAt = walletTreasuryState?.lastWithdrawAt ?? 0;
   const withdrawCooldownRemaining = getWithdrawCooldownRemaining(lastWithdrawAt, now);
@@ -104,6 +124,7 @@ export function useTreasury() {
     if (!connected || !publicKey) return "wallet-not-connected" as TreasuryBlockReason;
     if (!treasuryPubkey) return "treasury-not-configured" as TreasuryBlockReason;
     if (!mintPubkey) return "mint-not-configured" as TreasuryBlockReason;
+    if (withdrawalsEnabled === false) return "withdrawals-disabled" as TreasuryBlockReason;
 
     return getWithdrawBlockReason(
       playerLevel,
@@ -123,6 +144,7 @@ export function useTreasury() {
     publicKey,
     treasuryPubkey,
     walletMode,
+    withdrawalsEnabled,
   ]);
 
   const canDeposit =
@@ -320,7 +342,10 @@ export function useTreasury() {
 
         setStatus({
           type: "error",
-          message: payload.error ?? "Withdrawal failed. Your $CORN was restored.",
+          message:
+            payload.error?.includes("signer") || payload.error?.includes("configured")
+              ? getTreasuryBlockMessage("withdrawals-disabled")
+              : (payload.error ?? "Withdrawal failed. Your $CORN was restored."),
         });
         return;
       }
@@ -416,6 +441,9 @@ export function useTreasury() {
     if (!connected) return "Connect your wallet first.";
     if (!treasuryPubkey) return "Treasury wallet is not configured.";
     if (!mintPubkey) return "$CORN mint is not configured.";
+    if (withdrawalsEnabled === false) {
+      return getTreasuryBlockMessage("withdrawals-disabled");
+    }
     if (playerLevel < WITHDRAW_MIN_LEVEL) {
       return `Unlocks at level ${WITHDRAW_MIN_LEVEL} — protects treasury while it is seeded at launch and refilled by deposits. You are level ${playerLevel}.`;
     }
@@ -435,6 +463,7 @@ export function useTreasury() {
     treasuryPubkey,
     walletMode,
     withdrawCooldownRemaining,
+    withdrawalsEnabled,
   ]);
 
   const depositHint = useMemo(() => {
@@ -468,6 +497,7 @@ export function useTreasury() {
     withdrawRateLabel: "1:1 in-game $CORN → SPL wallet",
     withdrawMinLevel: WITHDRAW_MIN_LEVEL,
     playerLevel,
+    withdrawalsEnabled,
     isLoading: status.type === "loading",
     minDepositCorn: MIN_DEPOSIT_CORN,
     minWithdrawCorn: MIN_WITHDRAW_CORN,

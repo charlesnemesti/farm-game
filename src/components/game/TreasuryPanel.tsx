@@ -34,6 +34,7 @@ export function TreasuryPanel({ open, onClose }: TreasuryPanelProps) {
     isLoading,
     minDepositCorn,
     minWithdrawCorn,
+    withdrawalsEnabled,
   } = useTreasury();
   const [mounted, setMounted] = useState(false);
   const [recoverSignature, setRecoverSignature] = useState("");
@@ -111,6 +112,12 @@ export function TreasuryPanel({ open, onClose }: TreasuryPanelProps) {
             <h3 className="text-sm font-semibold text-white">Withdraw $CORN</h3>
             <p className="mt-1 text-xs text-white/70">{withdrawRateLabel}</p>
             <p className="mt-1 text-[11px] text-white/55">{withdrawHint}</p>
+            {withdrawalsEnabled === false ? (
+              <p className="mt-1 text-[11px] font-semibold text-amber-200/90">
+                Withdrawals disabled — server needs TREASURY_SECRET_KEY for wallet{" "}
+                AXp2F7…Nyvj (set in .env.local locally and in Vercel for production).
+              </p>
+            ) : null}
             {playerLevel < withdrawMinLevel ? (
               <p className="mt-1 text-[11px] font-semibold text-amber-200/90">
                 Locked until level {withdrawMinLevel}. Treasury is seeded by the team at

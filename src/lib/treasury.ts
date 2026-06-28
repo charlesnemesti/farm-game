@@ -29,6 +29,7 @@ export type TreasuryBlockReason =
   | "wallet-not-connected"
   | "treasury-not-configured"
   | "mint-not-configured"
+  | "withdrawals-disabled"
   | "invalid-deposit-amount"
   | "invalid-withdraw-amount"
   | "level-too-low"
@@ -254,6 +255,8 @@ export function getTreasuryBlockMessage(reason: TreasuryBlockReason): string {
       return "Treasury is not configured yet. Set NEXT_PUBLIC_TREASURY_PUBKEY.";
     case "mint-not-configured":
       return "$CORN mint is not configured. Set NEXT_PUBLIC_CORN_MINT.";
+    case "withdrawals-disabled":
+      return "Withdrawals are not enabled on the server. Set TREASURY_SECRET_KEY for the treasury wallet (local .env.local and Vercel env vars).";
     case "invalid-deposit-amount":
       return `Enter at least ${MIN_DEPOSIT_CORN} $CORN to deposit.`;
     case "invalid-withdraw-amount":
