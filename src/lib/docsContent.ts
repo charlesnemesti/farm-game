@@ -69,6 +69,7 @@ export const DOCS_NAV_GROUPS: DocsNavGroup[] = [
     label: "Economy",
     items: [
       { id: "tokenomics", label: "$CORN & tokenomics" },
+      { id: "economy-reference", label: "Economy reference" },
       { id: "treasury", label: "Treasury" },
       { id: "leaderboard", label: "Weekly leaderboard" },
     ],
@@ -232,8 +233,38 @@ export const DOCS_SECTIONS: DocsSection[] = [
       `Total supply: ${TOKENOMICS.totalSupply.toLocaleString("en-US")} ${TOKENOMICS.symbol} on ${TOKENOMICS.launchPlatform}.`,
       TOKENOMICS.graduation,
       `Price anchor at graduation: ~$${TOKENOMICS.priceAnchor.targetMarketCapUsd.toLocaleString("en-US")} market cap → ~$${TOKENOMICS.priceAnchor.tokenPriceAtGraduation} per token → Seeds Pack (${TOKENOMICS.priceAnchor.seedsPackCorn.toLocaleString("en-US")} $CORN) ≈ $${TOKENOMICS.priceAnchor.seedsPackUsdAtGraduation} USD.`,
+      "Economy rebalanced June 2026: all in-game $CORN prices and harvest rewards increased ~50% (rounded up to clean numbers). See Economy reference for the full table.",
     ],
     bullets: TOKENOMICS.sinks.map((item) => item),
+  },
+  {
+    id: "economy-reference",
+    title: "Economy reference",
+    paragraphs: [
+      "Current in-game $CORN values (June 2026 balance). Demo mode starts with enough $CORN for two seed packs; wallet mode starts at 0 until you deposit SPL $CORN.",
+    ],
+    subsections: [
+      {
+        title: "Starting balances",
+        body: `Demo: ${STARTING_CORN.toLocaleString("en-US")} $CORN. Wallet: ${WALLET_STARTING_CORN.toLocaleString("en-US")} $CORN until treasury deposit.`,
+      },
+      {
+        title: "Shop",
+        body: `Seeds Pack — ${SEED_PACK_ITEM.priceCorn.toLocaleString("en-US")} $CORN (${SEEDS_PER_PACK} random seeds per pack).`,
+      },
+      ...PLOT_ROW_UNLOCKS.map((row) => ({
+        title: `Row ${row.plotId + 1} unlock`,
+        body: `${row.cornCost.toLocaleString("en-US")} $CORN at player level ${row.minLevel}.`,
+      })),
+      ...(["common", "rare", "epic"] as const).map((rarity) => ({
+        title: `${rarity.charAt(0).toUpperCase() + rarity.slice(1)} harvest`,
+        body: `${SEED_STATS[rarity].cornPerCycle.toLocaleString("en-US")} $CORN per cycle (${formatHarvestCycle(SEED_STATS[rarity].harvestCycleSeconds)}).`,
+      })),
+      ...WEEKLY_PRIZE_TIERS.map((tier) => ({
+        title: tier.prizeLabel,
+        body: `${tier.prizeCorn.toLocaleString("en-US")} $CORN weekly prize (treasury payout).`,
+      })),
+    ],
   },
   {
     id: "treasury",

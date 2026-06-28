@@ -11,7 +11,7 @@ export const SEED_PACK_ITEM: ShopItem = {
   id: "seed-pack",
   name: "Seeds Pack",
   imageSrc: "/assets/shop/seed-pack.png",
-  priceCorn: 143_000,
+  priceCorn: 215_000,
 };
 
 export const SHOP_ITEMS: ShopItem[] = [SEED_PACK_ITEM];

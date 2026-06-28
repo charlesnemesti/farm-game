@@ -2,6 +2,8 @@
 
 import { clusterApiUrl, PublicKey } from "@solana/web3.js";
 import { STORAGE_PREFIX } from "./brandConfig";
+import { PLOT_ROW_UNLOCKS } from "./plotUnlock";
+import { SEED_PACK_ITEM } from "./shopConfig";
 
 export type SolanaCluster = "mainnet-beta" | "devnet" | "testnet";
 
@@ -29,12 +31,12 @@ export const TOKENOMICS = {
   launchSummary:
     "$CORN launches as a fair pump.fun token — 1 billion supply on the bonding curve, no team pre-mine or hidden mint.",
   graduation:
-    "When the curve completes (~85 SOL, ~$70k market cap), liquidity migrates to PumpSwap. In-game prices are fixed in $CORN; at graduation a Seeds Pack (~143,000 $CORN) targets ~$10 USD.",
+    `When the curve completes (~85 SOL, ~$70k market cap), liquidity migrates to PumpSwap. In-game prices are fixed in $CORN; at graduation a Seeds Pack (~${SEED_PACK_ITEM.priceCorn.toLocaleString("en-US")} $CORN) targets ~$15 USD.`,
   priceAnchor: {
     targetMarketCapUsd: 70_000,
     tokenPriceAtGraduation: 0.000_07,
-    seedsPackCorn: 143_000,
-    seedsPackUsdAtGraduation: 10,
+    seedsPackCorn: SEED_PACK_ITEM.priceCorn,
+    seedsPackUsdAtGraduation: 15,
   },
   levelProgression: {
     rowUnlockLevels: [5, 10, 15, 20] as const,
@@ -65,7 +67,7 @@ export const TOKENOMICS = {
     },
     {
       label: "Spend in-game",
-      detail: "Seed packs (143,000 $CORN), row unlocks at levels 5/10/15/20, and future sinks keep $CORN circulating.",
+      detail: `Seed packs (${SEED_PACK_ITEM.priceCorn.toLocaleString("en-US")} $CORN), row unlocks at levels 5/10/15/20, and future sinks keep $CORN circulating.`,
     },
     {
       label: "Farm & withdraw",
@@ -73,8 +75,8 @@ export const TOKENOMICS = {
     },
   ],
   sinks: [
-    "Seed pack purchases — 143,000 $CORN per pack (3 seeds)",
-    "Plot row unlocks — 57k / 143k / 257k / 400k $CORN at levels 5, 10, 15, 20",
+    `Seed pack purchases — ${SEED_PACK_ITEM.priceCorn.toLocaleString("en-US")} $CORN per pack (3 seeds)`,
+    `Plot row unlocks — ${PLOT_ROW_UNLOCKS.map((row) => `${(row.cornCost / 1_000).toLocaleString("en-US")}k`).join(" / ")} $CORN at levels ${PLOT_ROW_UNLOCKS.map((row) => row.minLevel).join(", ")}`,
     "Future premium packs and seasonal events",
   ],
   risks: [

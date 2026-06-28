@@ -21,10 +21,10 @@ export const LEADERBOARD_STORE_FILE = "leaderboard.json";
 
 /** Weekly prizes for top producers (paid from treasury at season end). */
 export const WEEKLY_PRIZE_TIERS: LeaderboardPrizeTier[] = [
-  { rankMin: 1, rankMax: 1, prizeLabel: "1st place", prizeCorn: 200_000 },
-  { rankMin: 2, rankMax: 2, prizeLabel: "2nd place", prizeCorn: 100_000 },
-  { rankMin: 3, rankMax: 3, prizeLabel: "3rd place", prizeCorn: 60_000 },
-  { rankMin: 4, rankMax: 10, prizeLabel: "Top 10", prizeCorn: 20_000 },
+  { rankMin: 1, rankMax: 1, prizeLabel: "1st place", prizeCorn: 300_000 },
+  { rankMin: 2, rankMax: 2, prizeLabel: "2nd place", prizeCorn: 150_000 },
+  { rankMin: 3, rankMax: 3, prizeLabel: "3rd place", prizeCorn: 90_000 },
+  { rankMin: 4, rankMax: 10, prizeLabel: "Top 10", prizeCorn: 30_000 },
 ];
 
 export const LEADERBOARD_TOP_COUNT = 50;
